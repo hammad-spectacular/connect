@@ -537,6 +537,13 @@ textarea.form-input { resize: vertical; min-height: 90px; }
   .tab { flex: 1; text-align: center; padding: 8px 10px; font-size: 12px; }
   .header { gap: 12px; }
 }
+/* SPINNER & LOADING STATES */
+.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: currentColor; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.btn.loading { position: relative; pointer-events: none; opacity: 0.7; }
+.btn-primary.loading .spinner { border-top-color: #fff; }
+.btn:not(.btn-primary).loading .spinner { border-color: rgba(0,0,0,0.1); border-top-color: var(--text); }
+[data-theme="dark"] .btn:not(.btn-primary).loading .spinner { border-color: rgba(255,255,255,0.1); border-top-color: var(--text); }
 </style>
 </head>
 <body>
@@ -666,25 +673,61 @@ textarea.form-input { resize: vertical; min-height: 90px; }
   </div>
 </div>
 
-<script>
-let currentUser = '', groups = [], activeFilter = 'All', isDark = false, pendingDeleteId = null;
+<!-- FIREBASE SDKS -->
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-database-compat.js"></script>
 
-// STORAGE (localStorage fallback since standalone file)
+<script>
+// FIREBASE INIT
+const firebaseConfig = {
+  apiKey: "AIzaSyAOGEcSTVKpQJHCtvWI0qeMNq54W38pPEE",
+  authDomain: "connect-f1907.firebaseapp.com",
+  databaseURL: "https://connect-f1907-default-rtdb.firebaseio.com",
+  projectId: "connect-f1907",
+  storageBucket: "connect-f1907.firebasestorage.app",
+  messagingSenderId: "568969172995",
+  appId: "1:568969172995:web:ec9cbad8d6722b1f6d5636",
+  measurementId: "G-820XY1PEWX"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let currentUser = '', groups = [], activeFilter = 'All', isDark = false, pendingDeleteId = null;
+let initialLoad = true;
+
+// LOCAL STORAGE (For User & Theme)
 function save(key, val) { try { localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val)); } catch(e){} }
 function load(key, fallback) { try { const v = localStorage.getItem(key); return v !== null ? v : fallback; } catch(e){ return fallback; } }
 
 function init() {
-  try { groups = JSON.parse(load('connect-groups', '[]')); } catch(e) { groups = []; }
   currentUser = load('connect-user', '');
   if(currentUser) { document.getElementById('nameInput').value = currentUser; applyUser(); }
   isDark = load('connect-theme', 'light') === 'dark';
   applyTheme();
   renderAll();
+
+  // REALTIME DB LISTENER
+  db.ref('groups').on('value', (snapshot) => {
+    initialLoad = false;
+    const data = snapshot.val();
+    if (data) {
+      groups = Object.keys(data).map(key => ({ dbId: key, ...data[key] }));
+      groups.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+    } else {
+      groups = [];
+    }
+    renderAll();
+  }, (err) => {
+    console.error(err);
+    showToast('Failed to connect to database');
+    initialLoad = false;
+    renderAll();
+  });
 }
 
 function renderAll() { renderGroups(); renderMyGroups(); renderStats(); renderFilters(); }
 
-/* THEME */
+/* THEME & USER */
 function toggleTheme() {
   isDark = !isDark;
   applyTheme();
@@ -694,14 +737,13 @@ function applyTheme() {
   document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
   document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
 }
-
-/* USER */
 function setUser() {
   const v = document.getElementById('nameInput').value.trim();
   if(!v) { showToast('Please enter your name'); return; }
   currentUser = v;
   save('connect-user', v);
   applyUser();
+  renderAll(); // Re-render to reflect new name
   showToast('Welcome, ' + v + '! 👋');
 }
 function applyUser() {
@@ -730,15 +772,34 @@ function renderFilters() {
 }
 function setFilter(d) { activeFilter = d; renderFilters(); renderGroups(); }
 
-/* GROUPS */
+/* UI STATE HELPERS */
+function startButtonLoad(btnId, isModal = false) {
+  const btn = isModal ? document.getElementById(btnId) : document.querySelector(`button[onclick*="'${btnId}'"], button[onclick*="${btnId}"]`);
+  if (!btn) return null;
+  const originalHtml = btn.innerHTML;
+  btn.classList.add('loading');
+  btn.innerHTML = `<span class="spinner"></span> Processing...`;
+  return { btn, originalHtml };
+}
+function endButtonLoad(state) {
+  if (!state) return;
+  state.btn.classList.remove('loading');
+  state.btn.innerHTML = state.originalHtml;
+}
+
+/* GROUPS LIST */
 function renderGroups() {
+  const el = document.getElementById('groupsList');
+  if(initialLoad) {
+    el.innerHTML = `<div class="empty"><span class="spinner" style="border-top-color: var(--accent); border-color: var(--border-2); width: 30px; height: 30px;"></span><div class="empty-title" style="margin-top: 15px;">Loading groups...</div></div>`;
+    return;
+  }
   const q = (document.getElementById('searchInput').value || '').toLowerCase();
   const filtered = groups.filter(g => {
     const ms = !q || g.name.toLowerCase().includes(q) || g.subject.toLowerCase().includes(q) || (g.dept||'').toLowerCase().includes(q);
     const mf = activeFilter === 'All' || g.dept === activeFilter;
     return ms && mf;
   });
-  const el = document.getElementById('groupsList');
   if(!filtered.length) {
     el.innerHTML = `<div class="empty"><div class="empty-icon">🔭</div><div class="empty-title">No groups found</div><div class="empty-sub">Try a different search term<br>or create a new group.</div></div>`;
     return;
@@ -748,6 +809,10 @@ function renderGroups() {
 
 function renderMyGroups() {
   const el = document.getElementById('myGroupsList');
+  if(initialLoad) {
+    el.innerHTML = `<div class="empty"><span class="spinner" style="border-top-color: var(--accent); border-color: var(--border-2); width: 30px; height: 30px;"></span><div class="empty-title" style="margin-top: 15px;">Loading groups...</div></div>`;
+    return;
+  }
   if(!currentUser) {
     el.innerHTML = `<div class="empty"><div class="empty-icon">👤</div><div class="empty-title">Set your name first</div><div class="empty-sub">Enter your name at the top<br>to track your groups.</div></div>`;
     return;
@@ -778,9 +843,9 @@ function buildCard(g) {
   ).join('')}</div>` : '';
 
   let action = '';
-  if(isCreator) action = `<button class="btn btn-danger" onclick="confirmDelete('${g.id}')">🗑 Delete</button>`;
-  else if(isJoined) action = `<button class="btn" onclick="leaveGroup('${g.id}')">Leave group</button>`;
-  else if(!isFull) action = `<button class="btn btn-primary" onclick="joinGroup('${g.id}')">Join group →</button>`;
+  if(isCreator) action = `<button class="btn btn-danger" onclick="confirmDelete('${g.dbId}')">🗑 Delete</button>`;
+  else if(isJoined) action = `<button class="btn" onclick="leaveGroup('${g.dbId}')">Leave group</button>`;
+  else if(!isFull) action = `<button class="btn btn-primary" onclick="joinGroup('${g.dbId}')">Join group →</button>`;
   else action = `<button class="btn" disabled>Group full</button>`;
 
   return `<div class="card">
@@ -828,31 +893,43 @@ function renderStats() {
   </div>`;
 }
 
-/* CREATE */
-function createGroup() {
+/* DB OPERATIONS */
+async function createGroup() {
+  if(!currentUser) { showFormError('Please set your name first (top right).'); return; }
+  
   const name = document.getElementById('f-name').value.trim();
   const subject = document.getElementById('f-subject').value.trim();
   const err = document.getElementById('form-error');
-  if(!currentUser) { showFormError('Please set your name first (top right).'); return; }
+  
   if(!name) { showFormError('Group name is required.'); return; }
   if(!subject) { showFormError('Subject / Course is required.'); return; }
   err.style.display = 'none';
+
   const g = {
-    id: Date.now().toString(), name, subject,
+    name, subject,
     dept: document.getElementById('f-dept').value,
     max: parseInt(document.getElementById('f-max').value) || 6,
     time: document.getElementById('f-time').value,
     location: document.getElementById('f-location').value.trim(),
     desc: document.getElementById('f-desc').value.trim(),
-    creator: currentUser, members: [currentUser],
+    creator: currentUser, 
+    members: [currentUser],
     createdAt: new Date().toISOString()
   };
-  groups.unshift(g);
-  save('connect-groups', groups);
-  clearForm();
-  switchTab('browse');
-  renderGroups(); renderFilters();
-  showToast('Group created! ✦');
+
+  const loadState = startButtonLoad('createGroup');
+  try {
+    const newRef = db.ref('groups').push();
+    await newRef.set(g);
+    clearForm();
+    switchTab('browse');
+    showToast('Group created! ✦');
+  } catch (error) {
+    showFormError('Failed to create group. Database error.');
+    console.error(error);
+  } finally {
+    endButtonLoad(loadState);
+  }
 }
 
 function showFormError(msg) {
@@ -867,41 +944,65 @@ function clearForm() {
   document.getElementById('form-error').style.display = 'none';
 }
 
-/* JOIN / LEAVE */
-function joinGroup(id) {
+async function joinGroup(dbId) {
   if(!currentUser) { showToast('Set your name first'); return; }
-  const g = groups.find(x => x.id === id); if(!g) return;
+  const g = groups.find(x => x.dbId === dbId); if(!g) return;
   if((g.members||[]).includes(currentUser)) { showToast('Already in this group'); return; }
   if((g.members||[]).length >= g.max) { showToast('This group is full'); return; }
-  g.members = [...(g.members||[]), currentUser];
-  save('connect-groups', groups);
-  renderGroups(); renderFilters();
-  showToast('Joined "' + g.name + '"! 🎉');
+  
+  const loadState = startButtonLoad(dbId);
+  try {
+    const newMembers = [...(g.members||[]), currentUser];
+    await db.ref('groups/' + dbId).update({ members: newMembers });
+    showToast('Joined "' + g.name + '"! 🎉');
+  } catch(err) {
+    console.error(err);
+    showToast('Failed to join group.');
+  } finally {
+    endButtonLoad(loadState);
+  }
 }
 
-function leaveGroup(id) {
-  const g = groups.find(x => x.id === id); if(!g) return;
-  g.members = (g.members||[]).filter(m => m !== currentUser);
-  save('connect-groups', groups);
-  renderGroups(); renderMyGroups(); renderFilters();
-  showToast('Left "' + g.name + '"');
+async function leaveGroup(dbId) {
+  const g = groups.find(x => x.dbId === dbId); if(!g) return;
+  
+  const loadState = startButtonLoad(dbId);
+  try {
+    const newMembers = (g.members||[]).filter(m => m !== currentUser);
+    await db.ref('groups/' + dbId).update({ members: newMembers });
+    showToast('Left "' + g.name + '"');
+  } catch(err) {
+    console.error(err);
+    showToast('Failed to leave group.');
+  } finally {
+    endButtonLoad(loadState);
+  }
 }
 
 /* DELETE WITH MODAL */
-function confirmDelete(id) {
-  pendingDeleteId = id;
+function confirmDelete(dbId) {
+  pendingDeleteId = dbId;
   document.getElementById('modalOverlay').classList.add('open');
-  document.getElementById('modalConfirmBtn').onclick = () => { doDelete(); closeModal(); };
+  document.getElementById('modalConfirmBtn').onclick = () => { doDelete(); };
 }
 function closeModal() {
   document.getElementById('modalOverlay').classList.remove('open');
   pendingDeleteId = null;
 }
-function doDelete() {
-  groups = groups.filter(x => x.id !== pendingDeleteId);
-  save('connect-groups', groups);
-  renderAll();
-  showToast('Group deleted');
+async function doDelete() {
+  if (!pendingDeleteId) return;
+  
+  const loadState = startButtonLoad('modalConfirmBtn', true);
+  try {
+    await db.ref('groups/' + pendingDeleteId).remove();
+    showToast('Group deleted');
+    closeModal();
+  } catch(err) {
+    console.error(err);
+    showToast('Failed to delete group.');
+  } finally {
+    endButtonLoad(loadState);
+  }
 }
 document.getElementById('modalOverlay').addEventListener('click', function(e) {
   if(e.target === this) closeModal();
