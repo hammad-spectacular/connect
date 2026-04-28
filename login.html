@@ -241,8 +241,7 @@
         <div class="tag">Login to join or create study groups</div>
       </div>
       <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
-      <button class="theme-btn" onclick="logout()" title="Logout" style="font-size:13px; width:auto; padding: 0 12px;">Logout</button>
-    </div>
+     
 
     <div class="grid">
       <div class="card">
@@ -297,11 +296,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
 
   <script>
-    function logout() {
-  auth.signOut().then(() => {
-    window.location.href = 'login.html';
-  });
-}
+  
     const firebaseConfig = {
       apiKey: "AIzaSyAOGEcSTVKpQJHCtvWI0qeMNq54W38pPEE",
       authDomain: "connect-f1907.firebaseapp.com",
@@ -429,7 +424,7 @@
       if (u) {
         const label = (u.displayName || u.email || '').trim();
         if (label) save('connect-user', label);
-        window.location.href = 'connect.html';
+       window.location.href = 'index.html';
       }
     }
 
