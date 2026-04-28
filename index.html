@@ -214,38 +214,71 @@ body::before {
   flex-shrink: 0;
 }
 
-/* TABS */
-.tabs {
+/* CATEGORY NAV */
+.category-nav {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 2rem;
+}
+.cat-card {
   display: flex;
-  gap: 4px;
-  margin-bottom: 1.75rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 12px 14px;
   background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 4px;
-  box-shadow: var(--shadow-sm);
-  width: fit-content;
-  flex-wrap: wrap;
-}
-.tab {
-  padding: 8px 20px;
-  border-radius: 6px;
-  border: none;
-  background: transparent;
-  font-size: 13px;
-  font-family: var(--font);
-  font-weight: 500;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
   cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+.cat-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--cat-color, var(--accent));
+  opacity: 0;
+  transition: opacity 0.22s;
+}
+.cat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--cat-color, var(--accent)); }
+.cat-card:hover::before { opacity: 0.06; }
+.cat-card.active { border-color: var(--cat-color, var(--accent)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cat-color, var(--accent)) 20%, transparent), var(--shadow); }
+.cat-card.active::before { opacity: 0.1; }
+.cat-icon {
+  font-size: 28px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+  transition: transform 0.22s;
+}
+.cat-card:hover .cat-icon, .cat-card.active .cat-icon { transform: scale(1.15); }
+.cat-label {
+  font-family: var(--font);
+  font-size: 12.5px;
+  font-weight: 600;
   color: var(--text-2);
-  transition: all var(--transition);
-  white-space: nowrap;
+  text-align: center;
+  line-height: 1.3;
+  position: relative;
+  transition: color 0.22s;
 }
-.tab.active {
-  background: var(--accent);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(37,99,235,0.35);
+.cat-card.active .cat-label { color: var(--cat-color, var(--accent)); }
+.cat-desc {
+  font-size: 10.5px;
+  color: var(--text-3);
+  text-align: center;
+  line-height: 1.4;
+  position: relative;
 }
-.tab:hover:not(.active) { background: var(--bg-hover); color: var(--text); }
+@media (max-width: 600px) {
+  .category-nav { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .cat-card { padding: 14px 8px 11px; }
+  .cat-icon { font-size: 22px; }
+}
 
 /* SECTIONS */
 .section { display: none; animation: fadeUp 0.25s ease; }
@@ -264,10 +297,11 @@ body::before {
   color: var(--text-3);
   font-size: 15px;
   pointer-events: none;
+  transition: opacity 0.2s;
 }
 .search-bar {
   width: 100%;
-  padding: 11px 14px 11px 40px;
+  padding: 11px 44px 11px 40px;
   background: var(--bg-card);
   border: 1px solid var(--border-2);
   border-radius: var(--radius-sm);
@@ -280,6 +314,38 @@ body::before {
 }
 .search-bar:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.12), var(--shadow-sm); }
 .search-bar::placeholder { color: var(--text-3); }
+/* Search spinner inside bar */
+.search-spinner {
+  position: absolute;
+  right: 13px; top: 50%;
+  transform: translateY(-50%);
+  width: 16px; height: 16px;
+  border: 2px solid var(--border-2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  opacity: 0;
+  transition: opacity 0.15s;
+  pointer-events: none;
+}
+.search-spinner.visible { opacity: 1; }
+/* Search results flash bar */
+.search-result-bar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--accent-text);
+  font-weight: 500;
+  padding: 6px 10px;
+  background: var(--accent-bg);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  border-radius: 6px;
+  margin-bottom: 10px;
+  animation: fadeUp 0.2s ease;
+  transition: opacity 0.3s;
+}
+.search-result-bar.hidden { display: none; }
 
 /* FILTER CHIPS */
 .filter-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.25rem; }
@@ -545,9 +611,94 @@ textarea.form-input { resize: vertical; min-height: 90px; }
 .btn-primary.loading .spinner { border-top-color: #fff; }
 .btn:not(.btn-primary).loading .spinner { border-color: rgba(0,0,0,0.1); border-top-color: var(--text); }
 [data-theme="dark"] .btn:not(.btn-primary).loading .spinner { border-color: rgba(255,255,255,0.1); border-top-color: var(--text); }
+
+/* FULL PAGE LOADER */
+#page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+#page-loader.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.loader-ring {
+  position: relative;
+  width: 72px;
+  height: 72px;
+}
+.loader-ring::before,
+.loader-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 4px solid transparent;
+}
+.loader-ring::before {
+  border-top-color: var(--accent);
+  border-right-color: var(--accent);
+  animation: spin 0.9s cubic-bezier(0.5,0,0.5,1) infinite;
+}
+.loader-ring::after {
+  border-bottom-color: var(--accent-2);
+  border-left-color: var(--accent-2);
+  animation: spin 1.4s cubic-bezier(0.5,0,0.5,1) infinite reverse;
+  opacity: 0.55;
+}
+.loader-logo {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -1px;
+}
+.loader-text {
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-3);
+  letter-spacing: 0.3px;
+  animation: loaderPulse 1.4s ease-in-out infinite;
+}
+.loader-dots::after {
+  content: '';
+  animation: dots 1.4s steps(4, end) infinite;
+}
+@keyframes dots {
+  0%   { content: '';   }
+  25%  { content: '.';  }
+  50%  { content: '..'; }
+  75%  { content: '...';}
+}
+@keyframes loaderPulse {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1;   }
+}
 </style>
 </head>
 <body>
+<!-- FULL PAGE LOADER -->
+<div id="page-loader">
+  <div class="loader-ring">
+    <div class="loader-logo">C.</div>
+  </div>
+  <div class="loader-text">Loading groups<span class="loader-dots"></span></div>
+</div>
+
 <div class="bg-blob bg-blob-1"></div>
 <div class="bg-blob bg-blob-2"></div>
 <div class="bg-blob bg-blob-3"></div>
@@ -574,20 +725,38 @@ textarea.form-input { resize: vertical; min-height: 90px; }
     <span id="userLabel">Welcome —</span>
   </div>
 
-  <!-- TABS -->
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('browse')">Browse Groups</button>
-    <button class="tab" onclick="switchTab('create')">Create Group</button>
-    <button class="tab" onclick="switchTab('mine')">My Groups</button>
-    <button class="tab" onclick="switchTab('stats')">Overview</button>
-  </div>
+  <!-- CATEGORY NAV -->
+  <nav class="category-nav">
+    <button class="cat-card active" style="--cat-color:#2563EB" onclick="switchTab('browse')" id="cat-browse">
+      <span class="cat-icon">🔍</span>
+      <span class="cat-label">Browse Groups</span>
+      <span class="cat-desc">Explore &amp; join existing study groups</span>
+    </button>
+    <button class="cat-card" style="--cat-color:#7C3AED" onclick="switchTab('create')" id="cat-create">
+      <span class="cat-icon">✏️</span>
+      <span class="cat-label">Create a Group</span>
+      <span class="cat-desc">Start your own group for any subject</span>
+    </button>
+    <button class="cat-card" style="--cat-color:#059669" onclick="switchTab('mine')" id="cat-mine">
+      <span class="cat-icon">📚</span>
+      <span class="cat-label">My Groups</span>
+      <span class="cat-desc">Groups you created or joined</span>
+    </button>
+    <button class="cat-card" style="--cat-color:#D97706" onclick="switchTab('stats')" id="cat-stats">
+      <span class="cat-icon">📊</span>
+      <span class="cat-label">Overview</span>
+      <span class="cat-desc">Stats &amp; activity at a glance</span>
+    </button>
+  </nav>
 
   <!-- BROWSE -->
   <div class="section active" id="tab-browse">
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
-      <input class="search-bar" id="searchInput" placeholder="Search subject, topic or department…" oninput="renderGroups()" />
+      <input class="search-bar" id="searchInput" placeholder="Search subject, topic or department…" oninput="onSearchInput()" />
+      <span class="search-spinner" id="searchSpinner"></span>
     </div>
+    <div class="search-result-bar hidden" id="searchResultBar">✅ <span id="searchResultText"></span></div>
     <div class="filter-row" id="filterRow"></div>
     <div id="groupsList"></div>
   </div>
@@ -700,6 +869,11 @@ let initialLoad = true;
 function save(key, val) { try { localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val)); } catch(e){} }
 function load(key, fallback) { try { const v = localStorage.getItem(key); return v !== null ? v : fallback; } catch(e){ return fallback; } }
 
+function hideLoader() {
+  const loader = document.getElementById('page-loader');
+  if (loader) loader.classList.add('hidden');
+}
+
 function init() {
   currentUser = load('connect-user', '');
   if(currentUser) { document.getElementById('nameInput').value = currentUser; applyUser(); }
@@ -718,12 +892,17 @@ function init() {
       groups = [];
     }
     renderAll();
+    hideLoader();
   }, (err) => {
     console.error(err);
     showToast('Failed to connect to database');
     initialLoad = false;
     renderAll();
+    hideLoader();
   });
+
+  // Fallback: hide loader after 6s even if Firebase is slow
+  setTimeout(hideLoader, 6000);
 }
 
 function renderAll() { renderGroups(); renderMyGroups(); renderStats(); renderFilters(); }
@@ -755,13 +934,35 @@ function applyUser() {
 
 /* TABS */
 function switchTab(name) {
-  const order = ['browse','create','mine','stats'];
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', order[i] === name));
+  document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('active'));
+  const catEl = document.getElementById('cat-' + name);
+  if(catEl) catEl.classList.add('active');
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   if(name === 'mine') renderMyGroups();
   if(name === 'stats') renderStats();
   if(name === 'browse') renderGroups();
+}
+
+/* SEARCH WITH LOADING ANIMATION */
+let searchTimer = null;
+function onSearchInput() {
+  const spinner = document.getElementById('searchSpinner');
+  const resultBar = document.getElementById('searchResultBar');
+  spinner.classList.add('visible');
+  resultBar.classList.add('hidden');
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    renderGroups();
+    spinner.classList.remove('visible');
+    const q = document.getElementById('searchInput').value.trim();
+    if(q) {
+      const count = document.querySelectorAll('#groupsList .card').length;
+      document.getElementById('searchResultText').textContent =
+        count > 0 ? `Found ${count} group${count !== 1 ? 's' : ''} for "${q}"` : `No groups matched "${q}"`;
+      resultBar.classList.remove('hidden');
+    }
+  }, 420);
 }
 
 /* FILTERS */
