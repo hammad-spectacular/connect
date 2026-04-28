@@ -852,6 +852,7 @@ textarea.form-input { resize: vertical; min-height: 90px; }
 <!-- FIREBASE SDKS -->
 <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
 
 <script>
 // FIREBASE INIT
@@ -866,6 +867,7 @@ const firebaseConfig = {
   measurementId: "G-820XY1PEWX"
 };
 firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
 const db = firebase.database();
 
 let currentUser = '', groups = [], activeFilter = 'All', isDark = false, pendingDeleteId = null;
@@ -881,8 +883,23 @@ function hideLoader() {
 }
 
 function init() {
-  currentUser = load('connect-user', '');
-  if(currentUser) { document.getElementById('nameInput').value = currentUser; applyUser(); }
+ auth.onAuthStateChanged((user) => {
+  if (user) {
+    currentUser = user.displayName || user.email;
+    save('connect-user', currentUser);
+    applyUser();
+    renderAll();
+  } else {
+    window.location.href = 'login.html';
+  }
+});
+  auth.onAuthStateChanged((user) => {
+  if (user) {
+    currentUser = user.displayName || user.email;
+    applyUser();
+    renderAll();
+  }
+});
   isDark = load('connect-theme', 'light') === 'dark';
   applyTheme();
   renderAll();
