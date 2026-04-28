@@ -893,13 +893,6 @@ function init() {
     window.location.href = 'login.html';
   }
 });
-  auth.onAuthStateChanged((user) => {
-  if (user) {
-    currentUser = user.displayName || user.email;
-    applyUser();
-    renderAll();
-  }
-});
   isDark = load('connect-theme', 'light') === 'dark';
   applyTheme();
   renderAll();
@@ -907,7 +900,7 @@ function init() {
   // REALTIME DB LISTENER
   db.ref('groups').on('value', (snapshot) => {
     initialLoad = false;
-    const data = snapshot.val();
+    const data = sn
     if (data) {
       groups = Object.keys(data).map(key => ({ dbId: key, ...data[key] }));
       groups.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
