@@ -241,7 +241,7 @@
         <div class="tag">Login to join or create study groups</div>
       </div>
       <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
-     
+    </div>
 
     <div class="grid">
       <div class="card">
@@ -296,7 +296,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
 
   <script>
-  
     const firebaseConfig = {
       apiKey: "AIzaSyAOGEcSTVKpQJHCtvWI0qeMNq54W38pPEE",
       authDomain: "connect-f1907.firebaseapp.com",
@@ -424,13 +423,22 @@
       if (u) {
         const label = (u.displayName || u.email || '').trim();
         if (label) save('connect-user', label);
-       window.location.href = 'index.html';
+        window.location.href = 'connectc.html';
       }
     }
 
     function init() {
       isDark = load('connect-theme', 'light') === 'dark';
       applyTheme();
+
+      // If the app logged out due to inactivity, surface a friendly message.
+      try {
+        const idle = localStorage.getItem('connect-idle-logout');
+        if (idle === '1') {
+          localStorage.removeItem('connect-idle-logout');
+          showError('You were logged out due to inactivity. Please sign in again.');
+        }
+      } catch (e) {}
 
       firebase.auth().onAuthStateChanged(() => toApp());
     }
