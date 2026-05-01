@@ -185,9 +185,6 @@ body::before {
 .name-btn:hover { background: var(--accent-2); }
 .name-btn:active { transform: scale(0.97); }
 
-/* Hide manual name input when authenticated */
-.name-wrap.hidden { display: none; }
-
 /* USER BAR */
 .user-bar {
   display: none;
@@ -217,63 +214,71 @@ body::before {
   flex-shrink: 0;
 }
 
-/* TABS */
-/* Category-style navigation (non-technical, easier to spot) */
-.tabs {
+/* CATEGORY NAV */
+.category-nav {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-  margin-bottom: 1.75rem;
-}
-.tab {
-  width: 100%;
-  text-align: left;
-  padding: 12px 14px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: var(--bg-card);
-  cursor: pointer;
-  transition: all var(--transition);
-  box-shadow: var(--shadow-sm);
-  display: flex;
+  grid-template-columns: repeat(4, 1fr);
   gap: 12px;
-  align-items: flex-start;
+  margin-bottom: 2rem;
 }
-.tab:hover { box-shadow: var(--shadow); transform: translateY(-1px); border-color: var(--border-2); }
-.tab:active { transform: scale(0.99) translateY(0); }
-.tab.active {
-  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.12), var(--shadow-sm);
+.cat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 12px 14px;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+  user-select: none;
 }
-.tab-ic {
-  width: 36px; height: 36px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  font-size: 18px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
+.cat-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--cat-color, var(--accent));
+  opacity: 0;
+  transition: opacity 0.22s;
 }
-.tab.active .tab-ic {
-  background: var(--accent-bg);
-  border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+.cat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--cat-color, var(--accent)); }
+.cat-card:hover::before { opacity: 0.06; }
+.cat-card.active { border-color: var(--cat-color, var(--accent)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cat-color, var(--accent)) 20%, transparent), var(--shadow); }
+.cat-card.active::before { opacity: 0.1; }
+.cat-icon {
+  font-size: 28px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+  transition: transform 0.22s;
 }
-.tab-txt { min-width: 0; }
-.tab-title {
+.cat-card:hover .cat-icon, .cat-card.active .cat-icon { transform: scale(1.15); }
+.cat-label {
   font-family: var(--font);
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text);
-  line-height: 1.2;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-2);
+  text-align: center;
+  line-height: 1.3;
+  position: relative;
+  transition: color 0.22s;
 }
-.tab-sub {
-  margin-top: 3px;
-  font-size: 12px;
+.cat-card.active .cat-label { color: var(--cat-color, var(--accent)); }
+.cat-desc {
+  font-size: 10.5px;
   color: var(--text-3);
-  line-height: 1.35;
+  text-align: center;
+  line-height: 1.4;
+  position: relative;
 }
-.tab.active .tab-sub { color: var(--text-2); }
+@media (max-width: 600px) {
+  .category-nav { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .cat-card { padding: 14px 8px 11px; }
+  .cat-icon { font-size: 22px; }
+}
 
 /* SECTIONS */
 .section { display: none; animation: fadeUp 0.25s ease; }
@@ -292,10 +297,11 @@ body::before {
   color: var(--text-3);
   font-size: 15px;
   pointer-events: none;
+  transition: opacity 0.2s;
 }
 .search-bar {
   width: 100%;
-  padding: 11px 140px 11px 40px;
+  padding: 11px 44px 11px 40px;
   background: var(--bg-card);
   border: 1px solid var(--border-2);
   border-radius: var(--radius-sm);
@@ -308,34 +314,38 @@ body::before {
 }
 .search-bar:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.12), var(--shadow-sm); }
 .search-bar::placeholder { color: var(--text-3); }
-
-/* Search loading indicator */
-.search-load {
+/* Search spinner inside bar */
+.search-spinner {
   position: absolute;
-  right: 12px;
-  top: 50%;
+  right: 13px; top: 50%;
   transform: translateY(-50%);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: var(--text-3);
-  padding: 6px 10px;
-  border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--bg-card) 75%, transparent);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--transition);
-}
-.search-load.show { opacity: 1; }
-.search-load .spinner {
-  width: 12px; height: 12px;
-  border-width: 2px;
-  border-color: var(--border-2);
+  width: 16px; height: 16px;
+  border: 2px solid var(--border-2);
   border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  opacity: 0;
+  transition: opacity 0.15s;
+  pointer-events: none;
 }
+.search-spinner.visible { opacity: 1; }
+/* Search results flash bar */
+.search-result-bar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--accent-text);
+  font-weight: 500;
+  padding: 6px 10px;
+  background: var(--accent-bg);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  border-radius: 6px;
+  margin-bottom: 10px;
+  animation: fadeUp 0.2s ease;
+  transition: opacity 0.3s;
+}
+.search-result-bar.hidden { display: none; }
 
 /* FILTER CHIPS */
 .filter-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.25rem; }
@@ -364,7 +374,7 @@ body::before {
   box-shadow: var(--shadow-sm);
   transition: all var(--transition);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 .card::before {
   content: '';
@@ -596,8 +606,8 @@ textarea.form-input { resize: vertical; min-height: 90px; }
 @media (max-width: 600px) {
   .form-grid { grid-template-columns: 1fr; }
   .stats-grid { grid-template-columns: 1fr; }
-  .tabs { grid-template-columns: 1fr 1fr; }
-  .tab { padding: 11px 12px; }
+  .tabs { width: 100%; }
+  .tab { flex: 1; text-align: center; padding: 8px 10px; font-size: 12px; }
   .header { gap: 12px; }
 }
 /* SPINNER & LOADING STATES */
@@ -607,9 +617,94 @@ textarea.form-input { resize: vertical; min-height: 90px; }
 .btn-primary.loading .spinner { border-top-color: #fff; }
 .btn:not(.btn-primary).loading .spinner { border-color: rgba(0,0,0,0.1); border-top-color: var(--text); }
 [data-theme="dark"] .btn:not(.btn-primary).loading .spinner { border-color: rgba(255,255,255,0.1); border-top-color: var(--text); }
+
+/* FULL PAGE LOADER */
+#page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+#page-loader.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.loader-ring {
+  position: relative;
+  width: 72px;
+  height: 72px;
+}
+.loader-ring::before,
+.loader-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 4px solid transparent;
+}
+.loader-ring::before {
+  border-top-color: var(--accent);
+  border-right-color: var(--accent);
+  animation: spin 0.9s cubic-bezier(0.5,0,0.5,1) infinite;
+}
+.loader-ring::after {
+  border-bottom-color: var(--accent-2);
+  border-left-color: var(--accent-2);
+  animation: spin 1.4s cubic-bezier(0.5,0,0.5,1) infinite reverse;
+  opacity: 0.55;
+}
+.loader-logo {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -1px;
+}
+.loader-text {
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-3);
+  letter-spacing: 0.3px;
+  animation: loaderPulse 1.4s ease-in-out infinite;
+}
+.loader-dots::after {
+  content: '';
+  animation: dots 1.4s steps(4, end) infinite;
+}
+@keyframes dots {
+  0%   { content: '';   }
+  25%  { content: '.';  }
+  50%  { content: '..'; }
+  75%  { content: '...';}
+}
+@keyframes loaderPulse {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1;   }
+}
 </style>
 </head>
 <body>
+<!-- FULL PAGE LOADER -->
+<div id="page-loader">
+  <div class="loader-ring">
+    <div class="loader-logo">C.</div>
+  </div>
+  <div class="loader-text">Loading groups<span class="loader-dots"></span></div>
+</div>
+
 <div class="bg-blob bg-blob-1"></div>
 <div class="bg-blob bg-blob-2"></div>
 <div class="bg-blob bg-blob-3"></div>
@@ -623,63 +718,51 @@ textarea.form-input { resize: vertical; min-height: 90px; }
     </div>
     <div class="header-right">
       <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
-      <button class="btn" id="editNameBtn" onclick="editName()" style="display:none">Edit name</button>
-      <button class="btn" id="logoutBtn" onclick="logout()" style="display:none">Log out</button>
-      <div class="name-wrap" id="nameWrap">
-        <input id="nameInput" class="name-input" placeholder="Your name…" onkeydown="if(event.key==='Enter')setUser()" />
-        <button class="name-btn" onclick="setUser()">Set name</button>
-      </div>
+      <button class="btn btn-danger" onclick="logout()" style="font-size:13px; padding: 8px 14px;">Logout</button>
     </div>
   </header>
 
   <!-- USER BAR -->
   <div class="user-bar" id="userBar">
-    <div class="avatar" id="avatarEl">?</div>
-    <span id="userLabel">Welcome —</span>
+    <div style="display:flex; align-items:center; gap: 10px; flex: 1;">
+      <div class="avatar" id="avatarEl">?</div>
+      <span id="userLabel">Welcome —</span>
+    </div>
+    <button class="btn btn-danger" onclick="logout()" style="font-size:12px; padding: 6px 12px;">Logout</button>
   </div>
 
-  <!-- TABS -->
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('browse')" aria-label="Browse groups">
-      <div class="tab-ic">🔎</div>
-      <div class="tab-txt">
-        <div class="tab-title">Find a Group</div>
-        <div class="tab-sub">Browse & search by subject</div>
-      </div>
+  <!-- CATEGORY NAV -->
+  <nav class="category-nav">
+    <button class="cat-card active" style="--cat-color:#2563EB" onclick="switchTab('browse')" id="cat-browse">
+      <span class="cat-icon">🔍</span>
+      <span class="cat-label">Browse Groups</span>
+      <span class="cat-desc">Explore &amp; join existing study groups</span>
     </button>
-    <button class="tab" onclick="switchTab('create')" aria-label="Create a group">
-      <div class="tab-ic">➕</div>
-      <div class="tab-txt">
-        <div class="tab-title">Start a Group</div>
-        <div class="tab-sub">Create a new study session</div>
-      </div>
+    <button class="cat-card" style="--cat-color:#7C3AED" onclick="switchTab('create')" id="cat-create">
+      <span class="cat-icon">✏️</span>
+      <span class="cat-label">Create a Group</span>
+      <span class="cat-desc">Start your own group for any subject</span>
     </button>
-    <button class="tab" onclick="switchTab('mine')" aria-label="My groups">
-      <div class="tab-ic">👤</div>
-      <div class="tab-txt">
-        <div class="tab-title">My Groups</div>
-        <div class="tab-sub">Groups you joined or made</div>
-      </div>
+    <button class="cat-card" style="--cat-color:#059669" onclick="switchTab('mine')" id="cat-mine">
+      <span class="cat-icon">📚</span>
+      <span class="cat-label">My Groups</span>
+      <span class="cat-desc">Groups you created or joined</span>
     </button>
-    <button class="tab" onclick="switchTab('stats')" aria-label="Overview">
-      <div class="tab-ic">📊</div>
-      <div class="tab-txt">
-        <div class="tab-title">Overview</div>
-        <div class="tab-sub">Quick stats & departments</div>
-      </div>
+    <button class="cat-card" style="--cat-color:#D97706" onclick="switchTab('stats')" id="cat-stats">
+      <span class="cat-icon">📊</span>
+      <span class="cat-label">Overview</span>
+      <span class="cat-desc">Stats &amp; activity at a glance</span>
     </button>
-  </div>
+  </nav>
 
   <!-- BROWSE -->
   <div class="section active" id="tab-browse">
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
-      <input class="search-bar" id="searchInput" placeholder="Search subject, topic or department…" oninput="handleSearchInput()" />
-      <div class="search-load" id="searchLoad" aria-live="polite">
-        <span class="spinner"></span>
-        <span>Searching…</span>
-      </div>
+      <input class="search-bar" id="searchInput" placeholder="Search subject, topic or department…" oninput="onSearchInput()" />
+      <span class="search-spinner" id="searchSpinner"></span>
     </div>
+    <div class="search-result-bar hidden" id="searchResultBar">✅ <span id="searchResultText"></span></div>
     <div class="filter-row" id="filterRow"></div>
     <div id="groupsList"></div>
   </div>
@@ -768,8 +851,8 @@ textarea.form-input { resize: vertical; min-height: 90px; }
 
 <!-- FIREBASE SDKS -->
 <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
 
 <script>
 // FIREBASE INIT
@@ -784,105 +867,35 @@ const firebaseConfig = {
   measurementId: "G-820XY1PEWX"
 };
 firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
 const db = firebase.database();
 
 let currentUser = '', groups = [], activeFilter = 'All', isDark = false, pendingDeleteId = null;
 let initialLoad = true;
-let searchDebounceTimer = null;
-let searchLoadingTimer = null;
-let isSearching = false;
-
-// AUTO LOGOUT (idle timeout)
-const IDLE_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
-const IDLE_WARN_MS = 60 * 1000; // 1 minute warning before logout
-let idleTimer = null;
-let idleWarnTimer = null;
-let idleArmed = false;
-const ACTIVITY_KEY = 'connect-last-activity';
-const IDLE_LOGOUT_KEY = 'connect-idle-logout';
-
-// SESSION TIMEOUT (absolute timeout regardless of activity)
-const SESSION_MINUTES = 15;
-const SESSION_TIMEOUT_MS = SESSION_MINUTES * 60 * 1000; // 15 minutes
-const SESSION_START_KEY = 'connect-session-start';
 
 // LOCAL STORAGE (For User & Theme)
 function save(key, val) { try { localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val)); } catch(e){} }
 function load(key, fallback) { try { const v = localStorage.getItem(key); return v !== null ? v : fallback; } catch(e){ return fallback; } }
 
-// SESSION TIMEOUT CHECK (runs on page load)
-function checkSessionTimeout() {
-  const lastActive = load(SESSION_START_KEY, null);
-  const now = Date.now();
-
-  if (lastActive && (now - parseInt(lastActive)) > SESSION_TIMEOUT_MS) {
-    // Session expired - log out even if user had another tab open
-    try { localStorage.removeItem('connect-user'); } catch(e) {}
-    try { localStorage.removeItem(SESSION_START_KEY); } catch(e) {}
-    firebase.auth().signOut().then(() => {
-      window.location.href = 'login.html';
-    }).catch(() => {
-      window.location.href = 'login.html';
-    });
-    return;
-  }
-
-  // Session still valid - update the session start time
-  save(SESSION_START_KEY, now.toString());
+function hideLoader() {
+  const loader = document.getElementById('page-loader');
+  if (loader) loader.classList.add('hidden');
 }
 
 function init() {
-  // Check session timeout first (before auth check)
-  checkSessionTimeout();
-
-  // AUTH GATE: require sign-in
-  firebase.auth().onAuthStateChanged((user) => {
-    if (!user) {
-      window.location.href = 'login.html';
-      return;
-    }
-
-    // Initialize session start time on fresh login
-    if (!load(SESSION_START_KEY, null)) {
-      save(SESSION_START_KEY, Date.now().toString());
-    }
-
-    // Use auth identity as the "currentUser" shown in UI
-    const label = userLabelFromAuth(user);
-    if (label) {
-      currentUser = label;
-      save('connect-user', label);
-      document.getElementById('nameInput').value = label;
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      currentUser = user.displayName || user.email;
+      save('connect-user', currentUser);
       applyUser();
+      renderAll();
+    } else {
+      window.location.href = 'landing.html';
     }
-
-    // Authenticated: show logout, hide manual name input
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) logoutBtn.style.display = 'inline-flex';
-    const editNameBtn = document.getElementById('editNameBtn');
-    if (editNameBtn) editNameBtn.style.display = 'inline-flex';
-    const nameWrap = document.getElementById('nameWrap');
-    if (nameWrap) nameWrap.classList.add('hidden');
-
-    // Arm idle logout only when authenticated
-    armIdleLogout();
   });
 
-  currentUser = load('connect-user', '');
-  if(currentUser) {
-    document.getElementById('nameInput').value = currentUser;
-    applyUser();
-    // If user was restored from storage, make logout visible too (UI consistency)
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) logoutBtn.style.display = 'inline-flex';
-    const editNameBtn = document.getElementById('editNameBtn');
-    if (editNameBtn) editNameBtn.style.display = 'inline-flex';
-    const nameWrap = document.getElementById('nameWrap');
-    if (nameWrap) nameWrap.classList.add('hidden');
-  }
   isDark = load('connect-theme', 'light') === 'dark';
   applyTheme();
-  renderAll();
 
   // REALTIME DB LISTENER
   db.ref('groups').on('value', (snapshot) => {
@@ -895,12 +908,17 @@ function init() {
       groups = [];
     }
     renderAll();
+    hideLoader();
   }, (err) => {
     console.error(err);
     showToast('Failed to connect to database');
     initialLoad = false;
     renderAll();
+    hideLoader();
   });
+
+  // Fallback: hide loader after 6s even if Firebase is slow
+  setTimeout(hideLoader, 6000);
 }
 
 function renderAll() { renderGroups(); renderMyGroups(); renderStats(); renderFilters(); }
@@ -915,137 +933,39 @@ function applyTheme() {
   document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
   document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
 }
-function setUser() {
-  const v = document.getElementById('nameInput').value.trim();
-  if(!v) { showToast('Please enter your name'); return; }
-  currentUser = v;
-  save('connect-user', v);
-  applyUser();
-  renderAll(); // Re-render to reflect new name
-  showToast('Welcome, ' + v + '! 👋');
+
+/* AUTHENTICATION & INACTIVITY LOGOUT */
+function logout() {
+  auth.signOut().then(() => {
+    window.location.href = 'landing.html';
+  });
 }
+
+let inactivityTimer;
+function resetInactivityTimer() {
+  clearTimeout(inactivityTimer);
+  // Logout after 15 minutes of inactivity (900000 ms)
+  inactivityTimer = setTimeout(() => {
+    logout();
+  }, 900000); 
+}
+// Listen for user activity to reset timer
+window.addEventListener('mousemove', resetInactivityTimer);
+window.addEventListener('keydown', resetInactivityTimer);
+window.addEventListener('scroll', resetInactivityTimer);
+window.addEventListener('click', resetInactivityTimer);
+
 function applyUser() {
   document.getElementById('userBar').style.display = 'flex';
   document.getElementById('userLabel').textContent = 'Logged in as ' + currentUser;
   document.getElementById('avatarEl').textContent = currentUser.slice(0,2).toUpperCase();
 }
 
-function userLabelFromAuth(user) {
-  if (!user) return '';
-  const dn = (user.displayName || '').trim();
-  if (dn) return dn;
-  const em = (user.email || '').trim();
-  if (em) return em.split('@')[0];
-  return 'User';
-}
-
-async function editName() {
-  const u = firebase.auth().currentUser;
-  if (!u) { showToast('Please sign in again'); window.location.href = 'login.html'; return; }
-  const current = (u.displayName || currentUser || '').trim();
-  const next = (window.prompt('Enter your name', current) || '').trim();
-  if (!next) return;
-  if (next.length > 32) { showToast('Name is too long'); return; }
-
-  try {
-    await u.updateProfile({ displayName: next });
-    currentUser = next;
-    save('connect-user', next);
-    applyUser();
-    renderAll();
-    showToast('Name updated');
-  } catch (e) {
-    console.error(e);
-    showToast('Could not update name');
-  }
-}
-
-async function logout() {
-  try {
-    await firebase.auth().signOut();
-  } finally {
-    // Keep theme, clear name fallback & session
-    try { localStorage.removeItem('connect-user'); } catch(e) {}
-    try { localStorage.removeItem(SESSION_START_KEY); } catch(e) {}
-    window.location.href = 'login.html';
-  }
-}
-
-function logoutDueToIdle() {
-  try { localStorage.setItem(IDLE_LOGOUT_KEY, '1'); } catch (e) {}
-  try { localStorage.removeItem(SESSION_START_KEY); } catch(e) {}
-  logout();
-}
-
-function noteActivity() {
-  const now = String(Date.now());
-  try { localStorage.setItem(ACTIVITY_KEY, now); } catch (e) {}
-  scheduleIdleTimers();
-}
-
-function getLastActivityMs() {
-  const v = load(ACTIVITY_KEY, '');
-  const n = parseInt(v, 10);
-  return Number.isFinite(n) ? n : Date.now();
-}
-
-function clearIdleTimers() {
-  if (idleTimer) clearTimeout(idleTimer);
-  if (idleWarnTimer) clearTimeout(idleWarnTimer);
-  idleTimer = null;
-  idleWarnTimer = null;
-}
-
-function scheduleIdleTimers() {
-  if (!idleArmed) return;
-  clearIdleTimers();
-
-  const last = getLastActivityMs();
-  const now = Date.now();
-  const elapsed = now - last;
-  const remaining = IDLE_TIMEOUT_MS - elapsed;
-  const warnRemaining = remaining - IDLE_WARN_MS;
-
-  if (remaining <= 0) {
-    logoutDueToIdle();
-    return;
-  }
-
-  if (warnRemaining > 0) {
-    idleWarnTimer = setTimeout(() => {
-      // Only warn if still logged in
-      if (firebase.auth().currentUser) showToast('You’ll be logged out soon due to inactivity.');
-    }, warnRemaining);
-  }
-
-  idleTimer = setTimeout(() => {
-    if (firebase.auth().currentUser) logoutDueToIdle();
-  }, remaining);
-}
-
-function armIdleLogout() {
-  if (idleArmed) return;
-  idleArmed = true;
-
-  // Seed activity at time of login
-  noteActivity();
-
-  // User interaction events
-  const events = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'pointerdown'];
-  events.forEach((ev) => window.addEventListener(ev, noteActivity, { passive: true }));
-  window.addEventListener('focus', noteActivity);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) noteActivity(); });
-
-  // Cross-tab sync: when activity is recorded in another tab, reset timers here too
-  window.addEventListener('storage', (e) => {
-    if (e && e.key === ACTIVITY_KEY) scheduleIdleTimers();
-  });
-}
-
 /* TABS */
 function switchTab(name) {
-  const order = ['browse','create','mine','stats'];
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', order[i] === name));
+  document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('active'));
+  const catEl = document.getElementById('cat-' + name);
+  if(catEl) catEl.classList.add('active');
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   if(name === 'mine') renderMyGroups();
@@ -1053,28 +973,25 @@ function switchTab(name) {
   if(name === 'browse') renderGroups();
 }
 
-/* SEARCH UX (debounced + visible "searching" indicator) */
-function setSearchLoading(on) {
-  isSearching = !!on;
-  const loadEl = document.getElementById('searchLoad');
-  if (!loadEl) return;
-  loadEl.classList.toggle('show', isSearching);
-}
-function handleSearchInput() {
-  // If data isn't loaded yet, keep existing "Loading groups..." state.
-  if (initialLoad) return;
-
-  // Debounce so users see feedback while typing and UI doesn't feel abrupt.
-  clearTimeout(searchDebounceTimer);
-  clearTimeout(searchLoadingTimer);
-
-  // Show loader only if the user pauses briefly (prevents flicker on single keystrokes).
-  searchLoadingTimer = setTimeout(() => setSearchLoading(true), 120);
-
-  searchDebounceTimer = setTimeout(() => {
-    setSearchLoading(false);
+/* SEARCH WITH LOADING ANIMATION */
+let searchTimer = null;
+function onSearchInput() {
+  const spinner = document.getElementById('searchSpinner');
+  const resultBar = document.getElementById('searchResultBar');
+  spinner.classList.add('visible');
+  resultBar.classList.add('hidden');
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
     renderGroups();
-  }, 320);
+    spinner.classList.remove('visible');
+    const q = document.getElementById('searchInput').value.trim();
+    if(q) {
+      const count = document.querySelectorAll('#groupsList .card').length;
+      document.getElementById('searchResultText').textContent =
+        count > 0 ? `Found ${count} group${count !== 1 ? 's' : ''} for "${q}"` : `No groups matched "${q}"`;
+      resultBar.classList.remove('hidden');
+    }
+  }, 420);
 }
 
 /* FILTERS */
@@ -1108,8 +1025,6 @@ function renderGroups() {
     el.innerHTML = `<div class="empty"><span class="spinner" style="border-top-color: var(--accent); border-color: var(--border-2); width: 30px; height: 30px;"></span><div class="empty-title" style="margin-top: 15px;">Loading groups...</div></div>`;
     return;
   }
-  // Ensure loader is not stuck if something triggered a render directly.
-  setSearchLoading(false);
   const q = (document.getElementById('searchInput').value || '').toLowerCase();
   const filtered = groups.filter(g => {
     const ms = !q || g.name.toLowerCase().includes(q) || g.subject.toLowerCase().includes(q) || (g.dept||'').toLowerCase().includes(q);
