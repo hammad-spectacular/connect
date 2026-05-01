@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Connect — Sign In</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #F7F5F0;
+      --bg-card: #FFFFFF;
+      --bg-secondary: #F0EDE8;
+      --bg-input: #FFFFFF;
+      --bg-hover: #F7F5F0;
+      --text: #1C1917;
+      --text-2: #57534E;
+      --text-3: #A8A29E;
+      --border: #E7E5E0;
+      --border-2: #D6D3CE;
+      --accent: #2563EB;
+      --accent-bg: #EFF6FF;
+      --accent-text: #1D4ED8;
+      --accent-2: #7C3AED;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow: 0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
+      --radius: 14px;
+      --radius-sm: 10px;
+      --radius-pill: 100px;
+      --font: 'Sora', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --transition: 0.18s cubic-bezier(0.4,0,0.2,1);
+    }
+    [data-theme="dark"] {
+      --bg: #0C0A09;
+      --bg-card: #1C1917;
+      --bg-secondary: #292524;
+      --bg-input: #1C1917;
+      --bg-hover: #292524;
+      --text: #FAFAF9;
+      --text-2: #A8A29E;
+      --text-3: #57534E;
+      --border: #292524;
+      --border-2: #3C3836;
+      --accent: #3B82F6;
+      --accent-bg: #1E3A5F;
+      --accent-text: #93C5FD;
+      --accent-2: #A78BFA;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+      --shadow: 0 4px 16px rgba(0,0,0,0.4);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition), color var(--transition);
+      -webkit-font-smoothing: antialiased;
+      padding: 1.25rem;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+    .bg-blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.08;
+      pointer-events: none;
+      z-index: 0;
+      animation: blobFloat 12s ease-in-out infinite alternate;
+    }
+    [data-theme="dark"] .bg-blob { opacity: 0.12; }
+    .bg-blob-1 { width: 500px; height: 500px; background: #2563EB; top: -100px; right: -100px; }
+    .bg-blob-2 { width: 400px; height: 400px; background: #7C3AED; bottom: -100px; left: -100px; }
+    @keyframes blobFloat { 0% { transform: translate(0,0) scale(1);} 100% { transform: translate(30px, 20px) scale(1.08);} }
+
+    .card {
+      position: relative;
+      z-index: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.25rem;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: var(--shadow-lg);
+    }
+    .top { text-align: center; margin-bottom: 1.75rem; }
+    .logo { font-family: var(--font); font-size: 28px; font-weight: 800; letter-spacing: -1.5px; margin-bottom: 0.5rem; }
+    .logo .dot { color: var(--accent); }
+    
+    h1 { font-family: var(--font); font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
+    .muted { color: var(--text-2); font-size: 14px; line-height: 1.5; margin-bottom: 1.5rem; }
+    
+    .form { display: grid; gap: 16px; }
+    .label { font-size: 11px; font-family: var(--font); font-weight: 700; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; display: block; }
+    .input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border-2);
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-family: var(--font-body);
+      background: var(--bg-input);
+      color: var(--text);
+      outline: none;
+      transition: all var(--transition);
+    }
+    .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
+    
+    .pw-wrap { position: relative; }
+    .pw-wrap .input { padding-right: 44px; }
+    .pw-toggle {
+      position: absolute;
+      right: 12px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: var(--text-3); font-size: 18px; padding: 4px;
+      transition: color var(--transition);
+    }
+    .pw-toggle:hover { color: var(--text-2); }
+
+    .forgot-link {
+      display: block;
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      text-align: right;
+    }
+    .forgot-link:hover { text-decoration: underline; color: var(--accent-2); }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 14px;
+      transition: all var(--transition);
+      box-shadow: 0 4px 12px rgba(37,99,235,0.25);
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .btn:hover { background: var(--accent-2); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(124,58,237,0.32); }
+    .btn:active { transform: scale(0.98) translateY(0); }
+    .btn.loading { pointer-events: none; opacity: 0.8; }
+    
+    .btn-google {
+      background: var(--bg-card);
+      color: var(--text);
+      border-color: var(--border-2);
+      box-shadow: var(--shadow-sm);
+      margin-top: 8px;
+    }
+    .btn-google:hover { background: var(--bg-secondary); border-color: var(--border-2); box-shadow: var(--shadow); }
+    .btn-google img { width: 18px; height: 18px; }
+
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      color: var(--text-3); font-size: 12px; font-weight: 500;
+      margin: 8px 0;
+    }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .links { margin-top: 1.75rem; text-align: center; font-size: 14px; color: var(--text-3); }
+    .links a { color: var(--accent); text-decoration: none; font-weight: 600; transition: color var(--transition); }
+    .links a:hover { color: var(--accent-2); text-decoration: underline; }
+
+    .err {
+      display: none;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      color: #b91c1c;
+      font-size: 13px;
+      line-height: 1.45;
+      margin-top: 8px;
+    }
+    [data-theme="dark"] .err { color: #fca5a5; background: rgba(239,68,68,0.16); }
+
+    .theme-toggle {
+      position: fixed; top: 1.5rem; right: 1.5rem;
+      width: 40px; height: 40px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-2);
+      background: var(--bg-card);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      transition: all var(--transition);
+      box-shadow: var(--shadow-sm);
+      z-index: 100;
+    }
+    .theme-toggle:hover { transform: scale(1.07); box-shadow: var(--shadow); }
+
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: currentColor; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="bg-blob bg-blob-1"></div>
+  <div class="bg-blob bg-blob-2"></div>
+  
+  <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()">🌙</button>
+
+  <div class="card">
+    <div class="top">
+      <div class="logo">Connect<span class="dot">.</span></div>
+    </div>
+    
+    <h1>Welcome Back</h1>
+    <p class="muted">Sign in to access your study groups and stay connected.</p>
+
+    <div class="form">
+      <div>
+        <label class="label">Email Address</label>
+        <input class="input" id="email" type="email" placeholder="you@example.com" autocomplete="email" />
+      </div>
+      
+      <div>
+        <label class="label">Password</label>
+        <div class="pw-wrap">
+          <input class="input" id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
+          <button class="pw-toggle" onclick="togglePw('password', this)" type="button">👁</button>
+        </div>
+        <a href="forgotpassword.html" class="forgot-link">Forgot password?</a>
+      </div>
+      
+      <button class="btn" id="signInBtn" onclick="signIn()">Sign In</button>
+      
+      <div class="divider">or</div>
+      
+      <button class="btn btn-google" id="googleBtn" onclick="signInWithGoogle()">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+        Continue with Google
+      </button>
+
+      <div class="err" id="errBox"></div>
+    </div>
+
+    <div class="links">
+      Don't have an account? <a href="signup.html">Create one</a>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAOGEcSTVKpQJHCtvWI0qeMNq54W38pPEE",
+      authDomain: "connect-f1907.firebaseapp.com",
+      databaseURL: "https://connect-f1907-default-rtdb.firebaseio.com",
+      projectId: "connect-f1907",
+      storageBucket: "connect-f1907.firebasestorage.app",
+      messagingSenderId: "568969172995",
+      appId: "1:568969172995:web:ec9cbad8d6722b1f6d5636",
+      measurementId: "G-820XY1PEWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    let isDark = false;
+    function save(key, val) { try { localStorage.setItem(key, val); } catch(e){} }
+    function load(key, fallback) { try { const v = localStorage.getItem(key); return v !== null ? v : fallback; } catch(e){ return fallback; } }
+
+    function applyTheme() {
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
+      save('connect-theme', isDark ? 'dark' : 'light');
+    }
+    function toggleTheme() { isDark = !isDark; applyTheme(); }
+
+    function togglePw(inputId, btn) {
+      const inp = document.getElementById(inputId);
+      if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+      else { inp.type = 'password'; btn.textContent = '👁'; }
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('errBox');
+      el.textContent = msg;
+      el.style.display = msg ? 'block' : 'none';
+    }
+
+    function friendlyError(e) {
+      if (!e) return 'Something went wrong.';
+      const code = e.code || '';
+      const message = e.message || '';
+      if (code === 'auth/invalid-email' || message.includes('invalid-email')) return 'Please enter a valid email.';
+      if (code === 'auth/invalid-credential' || message.includes('invalid-credential')) return 'Incorrect email or password.';
+      if (code === 'auth/too-many-requests') return 'Too many attempts. Please wait.';
+      return 'Sign in failed. Please try again.';
+    }
+
+    async function signIn() {
+      showError('');
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      if (!email || !password) { showError('Please enter both email and password.'); return; }
+
+      const btn = document.getElementById('signInBtn');
+      btn.classList.add('loading');
+      btn.innerHTML = '<span class="spinner"></span> Signing in...';
+      btn.disabled = true;
+
+      try {
+        await firebase.auth().signInWithEmailAndPassword(email, password);
+      } catch (e) {
+        showError(friendlyError(e));
+        btn.classList.remove('loading');
+        btn.innerHTML = 'Sign In';
+        btn.disabled = false;
+      }
+    }
+
+    async function signInWithGoogle() {
+      showError('');
+      const btn = document.getElementById('googleBtn');
+      btn.classList.add('loading');
+      btn.disabled = true;
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        await firebase.auth().signInWithPopup(provider);
+      } catch (e) {
+        if (e.code === 'auth/popup-closed-by-user') { showError('Sign in cancelled.'); }
+        else { showError('Google sign in failed.'); }
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }
+    }
+
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) window.location.href = 'index.html';
+    });
+
+    isDark = load('connect-theme', 'light') === 'dark';
+    applyTheme();
+  </script>
+</body>
+</html>

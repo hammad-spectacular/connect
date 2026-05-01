@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Connect — Welcome</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #F7F5F0;
+      --bg-card: #FFFFFF;
+      --bg-secondary: #F0EDE8;
+      --bg-input: #FFFFFF;
+      --bg-hover: #F7F5F0;
+      --text: #1C1917;
+      --text-2: #57534E;
+      --text-3: #A8A29E;
+      --border: #E7E5E0;
+      --border-2: #D6D3CE;
+      --accent: #2563EB;
+      --accent-bg: #EFF6FF;
+      --accent-text: #1D4ED8;
+      --accent-2: #7C3AED;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow: 0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
+      --radius: 14px;
+      --radius-sm: 10px;
+      --radius-pill: 100px;
+      --font: 'Sora', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --transition: 0.18s cubic-bezier(0.4,0,0.2,1);
+    }
+    [data-theme="dark"] {
+      --bg: #0C0A09;
+      --bg-card: #1C1917;
+      --bg-secondary: #292524;
+      --bg-input: #1C1917;
+      --bg-hover: #292524;
+      --text: #FAFAF9;
+      --text-2: #A8A29E;
+      --text-3: #57534E;
+      --border: #292524;
+      --border-2: #3C3836;
+      --accent: #3B82F6;
+      --accent-bg: #1E3A5F;
+      --accent-text: #93C5FD;
+      --accent-2: #A78BFA;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+      --shadow: 0 4px 16px rgba(0,0,0,0.4);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background var(--transition), color var(--transition);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+    .bg-blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.08;
+      pointer-events: none;
+      z-index: 0;
+      animation: blobFloat 12s ease-in-out infinite alternate;
+    }
+    [data-theme="dark"] .bg-blob { opacity: 0.12; }
+    .bg-blob-1 { width: 520px; height: 520px; background: #2563EB; top: -120px; right: -120px; animation-delay: 0s; }
+    .bg-blob-2 { width: 420px; height: 420px; background: #7C3AED; bottom: 120px; left: -100px; animation-delay: -5s; }
+    .bg-blob-3 { width: 320px; height: 320px; background: #0891B2; top: 50%; left: 45%; animation-delay: -9s; }
+    @keyframes blobFloat { 0% { transform: translate(0,0) scale(1);} 100% { transform: translate(30px, 20px) scale(1.08);} }
+
+    .wrap { position: relative; z-index: 1; max-width: 980px; margin: 0 auto; padding: 2.25rem 1.25rem 4rem; min-height: 100vh; display: flex; flex-direction: column; }
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 4rem;
+    }
+    .brand { display: flex; flex-direction: column; gap: 2px; }
+    .logo { font-family: var(--font); font-size: 28px; font-weight: 800; letter-spacing: -1.5px; line-height: 1; }
+    .logo .dot { color: var(--accent); }
+    .tag { font-size: 13px; color: var(--text-3); letter-spacing: 0.5px; font-weight: 500; }
+    
+    .theme-btn {
+      width: 42px; height: 42px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-2);
+      background: var(--bg-card);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      transition: all var(--transition);
+      box-shadow: var(--shadow-sm);
+    }
+    .theme-btn:hover { transform: scale(1.07); box-shadow: var(--shadow); }
+
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 3rem;
+      padding-bottom: 4rem;
+    }
+    
+    .hero {
+      max-width: 640px;
+      animation: fadeUp 0.6s ease;
+    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .hero h1 {
+      font-family: var(--font);
+      font-size: clamp(32px, 8vw, 48px);
+      font-weight: 800;
+      letter-spacing: -2px;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+    
+    .hero p {
+      font-size: clamp(16px, 4vw, 18px);
+      color: var(--text-2);
+      line-height: 1.6;
+      font-weight: 400;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      width: 100%;
+      max-width: 800px;
+      animation: fadeUp 0.8s ease backwards;
+      animation-delay: 0.2s;
+    }
+
+    .option-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2.5rem 1.5rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      cursor: pointer;
+      transition: all var(--transition);
+      box-shadow: var(--shadow);
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .option-btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0; height: 4px;
+      background: var(--btn-color, var(--accent));
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .option-btn:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--btn-color, var(--accent));
+    }
+    
+    .option-btn:hover::after { transform: scaleX(1); }
+
+    .option-icon {
+      font-size: 40px;
+      margin-bottom: 1.25rem;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+    }
+
+    .option-title {
+      font-family: var(--font);
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .option-sub {
+      font-size: 13px;
+      color: var(--text-3);
+      line-height: 1.4;
+    }
+
+    @media (max-width: 768px) {
+      .options-grid { grid-template-columns: 1fr; gap: 16px; max-width: 400px; }
+      .option-btn { padding: 1.5rem; flex-direction: row; text-align: left; gap: 1.25rem; }
+      .option-icon { font-size: 32px; margin-bottom: 0; }
+      .hero h1 { letter-spacing: -1px; }
+      .top { margin-bottom: 2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-blob bg-blob-1"></div>
+  <div class="bg-blob bg-blob-2"></div>
+  <div class="bg-blob bg-blob-3"></div>
+
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">
+        <div class="logo">Connect<span class="dot">.</span></div>
+        <div class="tag">Peer Study Groups</div>
+      </div>
+      <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+    </div>
+
+    <div class="content">
+      <div class="hero">
+        <h1>Learn together, grow together.</h1>
+        <p>The ultimate platform to find, join, and manage study groups with your peers. Simple, fast, and secure.</p>
+      </div>
+
+      <div class="options-grid">
+        <a href="signin.html" class="option-btn" style="--btn-color: var(--accent)">
+          <div class="option-icon">🔓</div>
+          <div>
+            <div class="option-title">Sign In</div>
+            <div class="option-sub">Access your account</div>
+          </div>
+        </a>
+
+        <a href="signup.html" class="option-btn" style="--btn-color: var(--accent-2)">
+          <div class="option-icon">✨</div>
+          <div>
+            <div class="option-title">Create Account</div>
+            <div class="option-sub">Join the community</div>
+          </div>
+        </a>
+
+        <a href="forgotpassword.html" class="option-btn" style="--btn-color: #0891B2">
+          <div class="option-icon">🔑</div>
+          <div>
+            <div class="option-title">Forgot Password</div>
+            <div class="option-sub">Recover access</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAOGEcSTVKpQJHCtvWI0qeMNq54W38pPEE",
+      authDomain: "connect-f1907.firebaseapp.com",
+      databaseURL: "https://connect-f1907-default-rtdb.firebaseio.com",
+      projectId: "connect-f1907",
+      storageBucket: "connect-f1907.firebasestorage.app",
+      messagingSenderId: "568969172995",
+      appId: "1:568969172995:web:ec9cbad8d6722b1f6d5636",
+      measurementId: "G-820XY1PEWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    let isDark = false;
+    function save(key, val) { try { localStorage.setItem(key, val); } catch(e){} }
+    function load(key, fallback) { try { const v = localStorage.getItem(key); return v !== null ? v : fallback; } catch(e){ return fallback; } }
+
+    function applyTheme() {
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
+      save('connect-theme', isDark ? 'dark' : 'light');
+    }
+    function toggleTheme() { isDark = !isDark; applyTheme(); }
+
+    function init() {
+      isDark = load('connect-theme', 'light') === 'dark';
+      applyTheme();
+
+      // Auth listener: Redirect if already logged in
+      firebase.auth().onAuthStateChanged(user => {
+        if (user) window.location.href = 'index.html';
+      });
+    }
+    init();
+  </script>
+</body>
+</html>
