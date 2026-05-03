@@ -753,6 +753,11 @@ textarea.form-input { resize: vertical; min-height: 90px; }
       <span class="cat-label">Overview</span>
       <span class="cat-desc">Stats &amp; activity at a glance</span>
     </button>
+    <button class="cat-card" style="--cat-color:#DC2626" onclick="switchTab('admin')" id="cat-admin">
+      <span class="cat-icon">⚙️</span>
+      <span class="cat-label">Admin Panel</span>
+      <span class="cat-desc">Manage join requests for your groups</span>
+    </button>
   </nav>
 
   <!-- BROWSE -->
@@ -805,6 +810,10 @@ textarea.form-input { resize: vertical; min-height: 90px; }
           <label class="form-label">Location / Platform</label>
           <input class="form-input" id="f-location" placeholder="Library Room 3 / Google Meet" />
         </div>
+        <div class="form-group">
+          <label class="form-label">Your WhatsApp Number *</label>
+          <input class="form-input" id="f-whatsapp" type="tel" placeholder="+92 300 1234567" />
+        </div>
         <div class="form-group form-full">
           <label class="form-label">Description</label>
           <textarea class="form-input" id="f-desc" placeholder="What will the group focus on? Any requirements or prerequisites?"></textarea>
@@ -832,10 +841,36 @@ textarea.form-input { resize: vertical; min-height: 90px; }
     </div>
     <div id="dept-breakdown"></div>
   </div>
+
+  <!-- ADMIN PANEL -->
+  <div class="section" id="tab-admin">
+    <div id="adminPanel"></div>
+  </div>
 </div>
 
 <!-- TOAST -->
 <div id="toast"></div>
+
+<!-- JOIN REQUEST MODAL -->
+<div class="modal-overlay" id="joinRequestOverlay">
+  <div class="modal">
+    <div class="modal-title">Request to join group</div>
+    <div style="gap: 14px; display: flex; flex-direction: column; margin-bottom: 1.5rem;">
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <label class="form-label">Your name *</label>
+        <input class="form-input" id="jr-name" placeholder="Your full name" />
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <label class="form-label">Message</label>
+        <textarea class="form-input" id="jr-msg" placeholder="Tell us why you want to join this group..." style="resize: vertical; min-height: 70px; max-height: 120px;"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeJoinRequest()">Cancel</button>
+      <button class="btn btn-primary" id="jr-submit" onclick="submitJoinRequest()">Send request</button>
+    </div>
+  </div>
+</div>
 
 <!-- CONFIRM MODAL -->
 <div class="modal-overlay" id="modalOverlay">
@@ -870,7 +905,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-let currentUser = '', groups = [], activeFilter = 'All', isDark = false, pendingDeleteId = null;
+let currentUser = '', groups = [], requests = {}, activeFilter = 'All', isDark = false, pendingDeleteId = null, pendingGroupId = null;
 let initialLoad = true;
 
 // LOCAL STORAGE (For User & Theme)
@@ -917,11 +952,17 @@ function init() {
     hideLoader();
   });
 
+  // LISTEN TO REQUESTS
+  db.ref('requests').on('value', (snapshot) => {
+    const data = snapshot.val();
+    requests = data || {};
+  });
+
   // Fallback: hide loader after 6s even if Firebase is slow
   setTimeout(hideLoader, 6000);
 }
 
-function renderAll() { renderGroups(); renderMyGroups(); renderStats(); renderFilters(); }
+function renderAll() { renderGroups(); renderMyGroups(); renderStats(); renderFilters(); renderAdmin(); }
 
 /* THEME & USER */
 function toggleTheme() {
@@ -970,6 +1011,7 @@ function switchTab(name) {
   document.getElementById('tab-' + name).classList.add('active');
   if(name === 'mine') renderMyGroups();
   if(name === 'stats') renderStats();
+  if(name === 'admin') renderAdmin();
   if(name === 'browse') renderGroups();
 }
 
@@ -1074,10 +1116,15 @@ function buildCard(g) {
   ).join('')}</div>` : '';
 
   let action = '';
-  if(isCreator) action = `<button class="btn btn-danger" onclick="confirmDelete('${g.dbId}')">🗑 Delete</button>`;
-  else if(isJoined) action = `<button class="btn" onclick="leaveGroup('${g.dbId}')">Leave group</button>`;
-  else if(!isFull) action = `<button class="btn btn-primary" onclick="joinGroup('${g.dbId}')">Join group →</button>`;
-  else action = `<button class="btn" disabled>Group full</button>`;
+  if(isCreator) {
+    action = `<button class="btn" onclick="switchTab('admin')">📋 View requests</button><button class="btn btn-danger" onclick="confirmDelete('${g.dbId}')">🗑 Delete</button>`;
+  } else if(isJoined) {
+    action = `<button class="btn" onclick="leaveGroup('${g.dbId}')">Leave group</button>`;
+  } else if(!isFull) {
+    action = `<button class="btn btn-primary" onclick="openJoinRequest('${g.dbId}')">Request to join →</button>`;
+  } else {
+    action = `<button class="btn" disabled>Group full</button>`;
+  }
 
   return `<div class="card">
     <div class="card-head">
@@ -1130,14 +1177,16 @@ async function createGroup() {
   
   const name = document.getElementById('f-name').value.trim();
   const subject = document.getElementById('f-subject').value.trim();
+  const whatsapp = document.getElementById('f-whatsapp').value.trim();
   const err = document.getElementById('form-error');
   
   if(!name) { showFormError('Group name is required.'); return; }
   if(!subject) { showFormError('Subject / Course is required.'); return; }
+  if(!whatsapp) { showFormError('WhatsApp number is required.'); return; }
   err.style.display = 'none';
 
   const g = {
-    name, subject,
+    name, subject, adminWhatsApp: whatsapp,
     dept: document.getElementById('f-dept').value,
     max: parseInt(document.getElementById('f-max').value) || 6,
     time: document.getElementById('f-time').value,
@@ -1170,9 +1219,53 @@ function showFormError(msg) {
 }
 
 function clearForm() {
-  ['f-name','f-subject','f-dept','f-time','f-location','f-desc'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  ['f-name','f-subject','f-dept','f-time','f-location','f-desc','f-whatsapp'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
   document.getElementById('f-max').value = '6';
   document.getElementById('form-error').style.display = 'none';
+}
+
+function openJoinRequest(dbId) {
+  if(!currentUser) { showToast('Set your name first'); return; }
+  pendingGroupId = dbId;
+  document.getElementById('jr-name').value = currentUser;
+  document.getElementById('jr-msg').value = '';
+  document.getElementById('joinRequestOverlay').classList.add('open');
+}
+
+function closeJoinRequest() {
+  document.getElementById('joinRequestOverlay').classList.remove('open');
+  pendingGroupId = null;
+}
+
+async function submitJoinRequest() {
+  if(!pendingGroupId) return;
+  const g = groups.find(x => x.dbId === pendingGroupId);
+  if(!g) { showToast('Group not found'); return; }
+  
+  const name = document.getElementById('jr-name').value.trim();
+  const msg = document.getElementById('jr-msg').value.trim();
+  
+  if(!name) { showToast('Please enter your name'); return; }
+  
+  const loadState = startButtonLoad('jr-submit', true);
+  try {
+    const requestId = db.ref().push().key;
+    const requestData = {
+      requesterName: name,
+      requesterMessage: msg,
+      requesterEmail: currentUser,
+      status: 'pending',
+      timestamp: new Date().toISOString()
+    };
+    await db.ref(`requests/${pendingGroupId}/${requestId}`).set(requestData);
+    showToast('Request sent! Admin will review it soon ✓');
+    closeJoinRequest();
+  } catch(err) {
+    console.error(err);
+    showToast('Failed to send request.');
+  } finally {
+    endButtonLoad(loadState);
+  }
 }
 
 async function joinGroup(dbId) {
@@ -1248,6 +1341,130 @@ function showToast(msg) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
 }
+
+/* ADMIN DASHBOARD */
+function renderAdmin() {
+  const el = document.getElementById('adminPanel');
+  if(initialLoad) {
+    el.innerHTML = `<div class="empty"><span class="spinner" style="border-top-color: var(--accent); border-color: var(--border-2); width: 30px; height: 30px;"></span><div class="empty-title" style="margin-top: 15px;">Loading...</div></div>`;
+    return;
+  }
+  
+  const myGroups = groups.filter(g => g.creator === currentUser);
+  if(!myGroups.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">👤</div><div class="empty-title">No groups created</div><div class="empty-sub">Create a group first to manage requests.</div></div>`;
+    return;
+  }
+  
+  let html = '';
+  myGroups.forEach(g => {
+    const groupRequests = requests[g.dbId] || {};
+    const pending = Object.entries(groupRequests).filter(([k,r]) => r.status === 'pending').map(([k,r]) => ({id:k, ...r}));
+    const accepted = Object.entries(groupRequests).filter(([k,r]) => r.status === 'accepted').map(([k,r]) => ({id:k, ...r}));
+    const rejected = Object.entries(groupRequests).filter(([k,r]) => r.status === 'rejected').map(([k,r]) => ({id:k, ...r}));
+    
+    html += `<div class="form-card" style="margin-bottom: 2rem;">
+      <div class="form-title">${g.name}</div>
+      <div style="margin-bottom: 1rem; padding: 10px 12px; background: var(--bg-secondary); border-radius: var(--radius-sm); font-size: 13px;">
+        <strong>Your WhatsApp:</strong> ${g.adminWhatsApp} | <strong>Pending:</strong> ${pending.length} | <strong>Accepted:</strong> ${accepted.length}
+      </div>`;
+    
+    if(!pending.length && !accepted.length && !rejected.length) {
+      html += `<div class="empty" style="padding: 2rem 1rem;"><div class="empty-icon">📬</div><div class="empty-title">No requests yet</div><div class="empty-sub">When people request to join,<br>they'll appear here.</div></div>`;
+    } else {
+      if(pending.length) {
+        html += `<div style="margin-bottom: 1.5rem;"><div style="font-weight: 600; color: var(--amber-text); margin-bottom: 0.75rem; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">⏳ Pending Requests (${pending.length})</div>`;
+        pending.forEach(r => {
+          html += `<div class="card" style="margin-bottom: 0.75rem;">
+            <div style="margin-bottom: 0.75rem;">
+              <div style="font-weight: 600; font-size: 14px; color: var(--text);">${r.requesterName}</div>
+              <div style="font-size: 12px; color: var(--text-3); margin-top: 2px;">${r.requesterEmail}</div>
+            </div>
+            ${r.requesterMessage ? `<div style="font-size: 13px; color: var(--text-2); margin-bottom: 0.75rem; padding: 8px 10px; background: var(--bg-secondary); border-radius: 6px; border-left: 3px solid var(--accent);">"${r.requesterMessage}"</div>` : ''}
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-primary" onclick="acceptRequest('${g.dbId}', '${r.id}', '${r.requesterName}')">✓ Accept</button>
+              <button class="btn btn-danger" onclick="rejectRequest('${g.dbId}', '${r.id}')">✗ Reject</button>
+            </div>
+          </div>`;
+        });
+        html += `</div>`;
+      }
+      
+      if(accepted.length) {
+        html += `<div style="margin-bottom: 1.5rem;"><div style="font-weight: 600; color: var(--green-text); margin-bottom: 0.75rem; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">✓ Accepted (${accepted.length})</div>`;
+        accepted.forEach(r => {
+          html += `<div class="card" style="margin-bottom: 0.75rem; border-left: 3px solid var(--accent);">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+              <div>
+                <div style="font-weight: 600; font-size: 14px; color: var(--text);">${r.requesterName}</div>
+                <div style="font-size: 12px; color: var(--text-3); margin-top: 2px;">${r.requesterEmail}</div>
+              </div>
+              <span class="badge badge-green">Accepted</span>
+            </div>
+          </div>`;
+        });
+        html += `</div>`;
+      }
+      
+      if(rejected.length) {
+        html += `<div><div style="font-weight: 600; color: var(--red-text); margin-bottom: 0.75rem; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">✗ Rejected (${rejected.length})</div>`;
+        rejected.forEach(r => {
+          html += `<div class="card" style="margin-bottom: 0.75rem; opacity: 0.6;">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+              <div>
+                <div style="font-weight: 600; font-size: 14px; color: var(--text);">${r.requesterName}</div>
+                <div style="font-size: 12px; color: var(--text-3); margin-top: 2px;">${r.requesterEmail}</div>
+              </div>
+              <span class="badge badge-red">Rejected</span>
+            </div>
+          </div>`;
+        });
+        html += `</div>`;
+      }
+    }
+    
+    html += `</div>`;
+  });
+  
+  el.innerHTML = html;
+}
+
+async function acceptRequest(groupId, requestId, requesterName) {
+  const g = groups.find(x => x.dbId === groupId);
+  if(!g) { showToast('Group not found'); return; }
+  if((g.members||[]).includes(requesterName)) {
+    showToast('User already in group');
+    return;
+  }
+  if((g.members||[]).length >= g.max) {
+    showToast('Group is now full');
+    return;
+  }
+  
+  try {
+    const newMembers = [...(g.members||[]), requesterName];
+    await db.ref(`groups/${groupId}`).update({ members: newMembers });
+    await db.ref(`requests/${groupId}/${requestId}`).update({ status: 'accepted' });
+    showToast('✓ Request accepted! Member added to group');
+  } catch(err) {
+    console.error(err);
+    showToast('Failed to accept request');
+  }
+}
+
+async function rejectRequest(groupId, requestId) {
+  try {
+    await db.ref(`requests/${groupId}/${requestId}`).update({ status: 'rejected' });
+    showToast('✗ Request rejected');
+  } catch(err) {
+    console.error(err);
+    showToast('Failed to reject request');
+  }
+}
+
+document.getElementById('joinRequestOverlay').addEventListener('click', function(e) {
+  if(e.target === this) closeJoinRequest();
+});
 
 init();
 </script>
