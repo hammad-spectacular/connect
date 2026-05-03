@@ -342,8 +342,11 @@
         const provider = new firebase.auth.GoogleAuthProvider();
         await firebase.auth().signInWithPopup(provider);
       } catch (e) {
+        console.error('Google auth error:', e.code, e.message);
         if (e.code === 'auth/popup-closed-by-user') { showError('Sign up cancelled.'); }
-        else { showError('Google sign up failed.'); }
+        else if (e.code === 'auth/operation-not-supported-in-this-environment') { showError('Pop-ups blocked or not supported. Try another browser.'); }
+        else if (e.code === 'auth/unauthorized-domain') { showError('This domain is not authorized. Check Firebase console.'); }
+        else { showError('Google sign up failed: ' + (e.message || e.code)); }
         btn.classList.remove('loading');
         btn.disabled = false;
       }
