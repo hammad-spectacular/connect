@@ -967,6 +967,7 @@ function init() {
   db.ref('requests').on('value', (snapshot) => {
     const data = snapshot.val();
     requests = data || {};
+    if (!initialLoad) renderAll();
   });
 
   // Fallback: hide loader after 6s even if Firebase is slow
@@ -1281,6 +1282,16 @@ function openJoinRequest(dbId) {
     db.ref('groups/' + dbId).remove().catch(e => console.error('Cleanup error:', e));
     return;
   }
+
+  // CHECK IF ALREADY REQUESTED
+  const groupRequests = requests[dbId] || {};
+  const alreadyRequested = Object.values(groupRequests).some(
+    r => r.requesterEmail === currentUser && (r.status === 'pending' || r.status === 'accepted')
+  );
+  if(alreadyRequested) {
+    showToast('You already sent a request to this group');
+    return;
+  }
   
   pendingGroupId = dbId;
   document.getElementById('jr-name').value = currentUser;
@@ -1297,7 +1308,18 @@ async function submitJoinRequest() {
   if(!pendingGroupId) return;
   const g = groups.find(x => x.dbId === pendingGroupId);
   if(!g) { showToast('Group not found'); return; }
-  
+
+  // SAFETY NET: Double-check for duplicate request
+  const groupRequests = requests[pendingGroupId] || {};
+  const alreadyRequested = Object.values(groupRequests).some(
+    r => r.requesterEmail === currentUser && (r.status === 'pending' || r.status === 'accepted')
+  );
+  if(alreadyRequested) {
+    showToast('You already sent a request to this group');
+    closeJoinRequest();
+    return;
+  }
+
   const name = document.getElementById('jr-name').value.trim();
   const msg = document.getElementById('jr-msg').value.trim();
   
