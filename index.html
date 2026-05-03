@@ -807,6 +807,10 @@ textarea.form-input { resize: vertical; min-height: 90px; }
           <input class="form-input" id="f-time" type="datetime-local" />
         </div>
         <div class="form-group">
+          <label class="form-label">Join deadline (expiry date) *</label>
+          <input class="form-input" id="f-expiry" type="date" />
+        </div>
+        <div class="form-group">
           <label class="form-label">Location / Platform</label>
           <input class="form-input" id="f-location" placeholder="Library Room 3 / Google Meet" />
         </div>
@@ -939,6 +943,13 @@ function init() {
     if (data) {
       groups = Object.keys(data).map(key => ({ dbId: key, ...data[key] }));
       groups.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+      
+      // AUTO-CLEANUP: Delete expired groups
+      Object.entries(data).forEach(([key, g]) => {
+        if(g.expiryDate && new Date() > new Date(g.expiryDate)) {
+          db.ref('groups/' + key).remove().catch(e => console.error('Cleanup error:', e));
+        }
+      });
     } else {
       groups = [];
     }
@@ -1099,6 +1110,16 @@ function renderMyGroups() {
 }
 
 function buildCard(g) {
+  const now = new Date();
+  const expiry = g.expiryDate ? new Date(g.expiryDate) : null;
+  const isExpired = expiry && now > expiry;
+  
+  // Auto delete from Firebase if expired
+  if(isExpired) {
+    db.ref('groups/' + g.dbId).remove().catch(e => console.error('Cleanup error:', e));
+    return '';
+  }
+  
   const mc = (g.members||[]).length;
   const isFull = mc >= g.max;
   const isJoined = (g.members||[]).includes(currentUser);
@@ -1110,6 +1131,21 @@ function buildCard(g) {
     : `<span class="badge badge-green">${g.max - mc} spot${g.max-mc!==1?'s':''} open</span>`;
   const deptBadge = g.dept ? `<span class="badge badge-blue">${g.dept}</span>` : '';
   const roleBadge = isCreator ? `<span class="badge badge-amber">⭐ Owner</span>` : isJoined ? `<span class="badge badge-blue">Joined</span>` : '';
+  
+  // Expiry badge with warning for closing soon
+  let expiryBadge = '';
+  if(expiry) {
+    const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
+    const expiryDateStr = expiry.toLocaleDateString('en-PK', {month:'short', day:'numeric'});
+    
+    if(daysLeft <= 1) {
+      expiryBadge = `<span class="badge badge-red">🔴 Closes today</span>`;
+    } else if(daysLeft <= 3) {
+      expiryBadge = `<span class="badge badge-amber">⚠️ ${daysLeft}d left</span>`;
+    } else {
+      expiryBadge = `<span class="badge" style="background: var(--accent-bg); color: var(--accent-text);">📅 ${daysLeft}d left</span>`;
+    }
+  }
 
   const membersHtml = mc ? `<div class="members-list">${(g.members||[]).map(m =>
     `<div class="m-chip ${m===currentUser?'you':''}">${m}${m===currentUser?' (you)':''}</div>`
@@ -1132,7 +1168,7 @@ function buildCard(g) {
         <div class="card-title">${g.name}</div>
         <div class="card-sub">${g.subject} &bull; by ${g.creator}</div>
       </div>
-      <div class="badge-row">${roleBadge}${spotsBadge}${deptBadge}</div>
+      <div class="badge-row">${roleBadge}${spotsBadge}${deptBadge}${expiryBadge}</div>
     </div>
     ${g.desc ? `<div class="card-desc">${g.desc}</div>` : ''}
     <div class="meta-row">
@@ -1178,11 +1214,18 @@ async function createGroup() {
   const name = document.getElementById('f-name').value.trim();
   const subject = document.getElementById('f-subject').value.trim();
   const whatsapp = document.getElementById('f-whatsapp').value.trim();
+  const expiryDateStr = document.getElementById('f-expiry').value;
   const err = document.getElementById('form-error');
   
   if(!name) { showFormError('Group name is required.'); return; }
   if(!subject) { showFormError('Subject / Course is required.'); return; }
   if(!whatsapp) { showFormError('WhatsApp number is required.'); return; }
+  if(!expiryDateStr) { showFormError('Please set a join deadline.'); return; }
+  
+  const expiryDate = new Date(expiryDateStr);
+  const now = new Date();
+  if(expiryDate < now) { showFormError('Expiry date must be in the future.'); return; }
+  
   err.style.display = 'none';
 
   const g = {
@@ -1194,6 +1237,8 @@ async function createGroup() {
     desc: document.getElementById('f-desc').value.trim(),
     creator: currentUser, 
     members: [currentUser],
+    expiryDate: expiryDateStr,
+    expiresAt: expiryDate.getTime(),
     createdAt: new Date().toISOString()
   };
 
@@ -1219,13 +1264,24 @@ function showFormError(msg) {
 }
 
 function clearForm() {
-  ['f-name','f-subject','f-dept','f-time','f-location','f-desc','f-whatsapp'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  ['f-name','f-subject','f-dept','f-time','f-location','f-desc','f-whatsapp','f-expiry'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
   document.getElementById('f-max').value = '6';
   document.getElementById('form-error').style.display = 'none';
 }
 
 function openJoinRequest(dbId) {
   if(!currentUser) { showToast('Set your name first'); return; }
+  const g = groups.find(x => x.dbId === dbId);
+  if(!g) { showToast('Group not found'); return; }
+  
+  // CHECK IF EXPIRED
+  const expiry = g.expiryDate ? new Date(g.expiryDate) : null;
+  if(expiry && new Date() > expiry) {
+    showToast('This group is no longer accepting requests');
+    db.ref('groups/' + dbId).remove().catch(e => console.error('Cleanup error:', e));
+    return;
+  }
+  
   pendingGroupId = dbId;
   document.getElementById('jr-name').value = currentUser;
   document.getElementById('jr-msg').value = '';
