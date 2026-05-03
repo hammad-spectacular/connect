@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Connect — Join Group</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #F7F5F0;
+      --bg-card: #FFFFFF;
+      --bg-secondary: #F0EDE8;
+      --bg-input: #FFFFFF;
+      --bg-hover: #F7F5F0;
+      --text: #1C1917;
+      --text-2: #57534E;
+      --text-3: #A8A29E;
+      --border: #E7E5E0;
+      --border-2: #D6D3CE;
+      --accent: #2563EB;
+      --accent-bg: #EFF6FF;
+      --accent-text: #1D4ED8;
+      --accent-2: #7C3AED;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow: 0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
+      --radius: 14px;
+      --radius-sm: 10px;
+      --radius-pill: 100px;
+      --font: 'Sora', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --transition: 0.18s cubic-bezier(0.4,0,0.2,1);
+    }
+    [data-theme="dark"] {
+      --bg: #0C0A09;
+      --bg-card: #1C1917;
+      --bg-secondary: #292524;
+      --bg-input: #1C1917;
+      --bg-hover: #292524;
+      --text: #FAFAF9;
+      --text-2: #A8A29E;
+      --text-3: #57534E;
+      --border: #292524;
+      --border-2: #3C3836;
+      --accent: #3B82F6;
+      --accent-bg: #1E3A5F;
+      --accent-text: #93C5FD;
+      --accent-2: #A78BFA;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+      --shadow: 0 4px 16px rgba(0,0,0,0.4);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition), color var(--transition);
+      -webkit-font-smoothing: antialiased;
+      padding: 1.25rem;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+    .bg-blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.08;
+      pointer-events: none;
+      z-index: 0;
+      animation: blobFloat 12s ease-in-out infinite alternate;
+    }
+    [data-theme="dark"] .bg-blob { opacity: 0.12; }
+    .bg-blob-1 { width: 500px; height: 500px; background: #2563EB; top: -100px; right: -100px; }
+    .bg-blob-2 { width: 400px; height: 400px; background: #7C3AED; bottom: -100px; left: -100px; }
+    @keyframes blobFloat { 0% { transform: translate(0,0) scale(1);} 100% { transform: translate(30px, 20px) scale(1.08);} }
+
+    .card {
+      position: relative;
+      z-index: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.25rem;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: var(--shadow-lg);
+    }
+    .top { text-align: center; margin-bottom: 1.5rem; }
+    .logo { font-family: var(--font); font-size: 28px; font-weight: 800; letter-spacing: -1.5px; margin-bottom: 0.5rem; }
+    .logo .dot { color: var(--accent); }
+    
+    h1 { font-family: var(--font); font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
+    .muted { color: var(--text-2); font-size: 14px; line-height: 1.5; margin-bottom: 1.5rem; }
+    
+    .form { display: grid; gap: 14px; }
+    .label { font-size: 11px; font-family: var(--font); font-weight: 700; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px; display: block; }
+    .input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid var(--border-2);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-family: var(--font-body);
+      background: var(--bg-input);
+      color: var(--text);
+      outline: none;
+      transition: all var(--transition);
+    }
+    .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
+    textarea.input { resize: vertical; min-height: 80px; }
+    
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 14px;
+      transition: all var(--transition);
+      box-shadow: 0 4px 12px rgba(37,99,235,0.25);
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      margin-top: 6px;
+    }
+    .btn:hover { background: var(--accent-2); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(124,58,237,0.32); }
+    .btn:active { transform: scale(0.98) translateY(0); }
+    .btn.loading { pointer-events: none; opacity: 0.8; }
+    
+    .btn-secondary {
+      background: var(--bg-secondary);
+      color: var(--text);
+      box-shadow: none;
+      border: 1px solid var(--border-2);
+    }
+    .btn-secondary:hover {
+      background: var(--bg-hover);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .err {
+      display: none;
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      color: #b91c1c;
+      font-size: 12.5px;
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+    [data-theme="dark"] .err { color: #fca5a5; background: rgba(239,68,68,0.16); }
+
+    .theme-toggle {
+      position: fixed; top: 1.5rem; right: 1.5rem;
+      width: 40px; height: 40px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-2);
+      background: var(--bg-card);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      transition: all var(--transition);
+      box-shadow: var(--shadow-sm);
+      z-index: 100;
+    }
+    .theme-toggle:hover { transform: scale(1.07); box-shadow: var(--shadow); }
+
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: currentColor; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    #groupNameDisplay {
+      font-weight: 600;
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-blob bg-blob-1"></div>
+  <div class="bg-blob bg-blob-2"></div>
+  
+  <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()">🌙</button>
+
+  <div class="card">
+    <div class="top">
+      <div class="logo">Connect<span class="dot">.</span></div>
+    </div>
+    
+    <h1>Request to Join</h1>
+    <p class="muted">You are requesting to join <span id="groupNameDisplay">...</span></p>
+
+    <div class="form">
+      <div>
+        <label class="label">Your Name *</label>
+        <input class="input" id="jr-name" placeholder="Your full name" />
+      </div>
+      
+      <div>
+        <label class="label">WhatsApp Number *</label>
+        <input class="input" id="jr-whatsapp" type="tel" placeholder="+92 300 1234567" />
+      </div>
+      
+      <div>
+        <label class="label">Message (Optional)</label>
+        <textarea class="input" id="jr-msg" placeholder="Tell the admin why you want to join..."></textarea>
+      </div>
+      
+      <button class="btn" id="submitBtn" onclick="submitJoinRequest()">Send Request</button>
+      <button class="btn btn-secondary" onclick="window.location.href='index.html'">Cancel</button>
+
+      <div class="err" id="errBox"></div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAOGEcSTVKpQJHCtvWI0qeMNq54W38pPEE",
+      authDomain: "connect-f1907.firebaseapp.com",
+      databaseURL: "https://connect-f1907-default-rtdb.firebaseio.com",
+      projectId: "connect-f1907",
+      storageBucket: "connect-f1907.firebasestorage.app",
+      messagingSenderId: "568969172995",
+      appId: "1:568969172995:web:ec9cbad8d6722b1f6d5636",
+      measurementId: "G-820XY1PEWX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    let isDark = false;
+    let currentUserEmail = null;
+    let currentUserName = null;
+    
+    // Get groupId from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const groupId = urlParams.get('groupId');
+    
+    if (!groupId) {
+      window.location.href = 'index.html';
+    }
+
+    function save(key, val) { try { localStorage.setItem(key, val); } catch(e){} }
+    function load(key, fallback) { try { const v = localStorage.getItem(key); return v !== null ? v : fallback; } catch(e){ return fallback; } }
+
+    function applyTheme() {
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
+      save('connect-theme', isDark ? 'dark' : 'light');
+    }
+    function toggleTheme() { isDark = !isDark; applyTheme(); }
+
+    function showError(msg) {
+      const el = document.getElementById('errBox');
+      el.textContent = msg;
+      el.style.display = msg ? 'block' : 'none';
+    }
+
+    // Initialize
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        currentUserEmail = user.email;
+        currentUserName = user.displayName || user.email;
+        document.getElementById('jr-name').value = currentUserName;
+        
+        // Fetch group details
+        db.ref('groups/' + groupId).once('value', (snapshot) => {
+          const group = snapshot.val();
+          if (group) {
+            document.getElementById('groupNameDisplay').textContent = group.name;
+          } else {
+            showError("Group not found.");
+            document.getElementById('submitBtn').disabled = true;
+          }
+        });
+      } else {
+        window.location.href = 'landing.html';
+      }
+    });
+
+    isDark = load('connect-theme', 'light') === 'dark';
+    applyTheme();
+
+    async function submitJoinRequest() {
+      showError('');
+      const name = document.getElementById('jr-name').value.trim();
+      const whatsapp = document.getElementById('jr-whatsapp').value.trim();
+      const msg = document.getElementById('jr-msg').value.trim();
+      
+      if (!name) { showError('Please enter your name.'); return; }
+      if (!whatsapp) { showError('Please enter your WhatsApp number.'); return; }
+
+      const btn = document.getElementById('submitBtn');
+      btn.classList.add('loading');
+      btn.innerHTML = '<span class="spinner"></span> Sending...';
+      btn.disabled = true;
+
+      try {
+        // Double check for duplicate request
+        const reqSnap = await db.ref('requests/' + groupId).once('value');
+        const requests = reqSnap.val() || {};
+        const alreadyRequested = Object.values(requests).some(
+          r => r.requesterEmail === currentUserEmail && (r.status === 'pending' || r.status === 'accepted')
+        );
+        
+        if(alreadyRequested) {
+          showError('You already sent a request to this group.');
+          btn.classList.remove('loading');
+          btn.innerHTML = 'Send Request';
+          btn.disabled = false;
+          return;
+        }
+
+        const requestId = db.ref().push().key;
+        const requestData = {
+          requesterName: name,
+          requesterWhatsApp: whatsapp,
+          requesterMessage: msg,
+          requesterEmail: currentUserEmail,
+          status: 'pending',
+          timestamp: new Date().toISOString()
+        };
+        
+        await db.ref(`requests/${groupId}/${requestId}`).set(requestData);
+        
+        // Save flag in localStorage to show toast on index.html
+        save('connect-toast', 'Request sent successfully! ✓');
+        window.location.href = 'index.html';
+        
+      } catch (e) {
+        console.error(e);
+        showError('Failed to send request. Please try again.');
+        btn.classList.remove('loading');
+        btn.innerHTML = 'Send Request';
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
