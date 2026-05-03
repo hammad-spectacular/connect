@@ -217,16 +217,37 @@ body::before {
 /* CATEGORY NAV */
 .category-nav {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
   margin-bottom: 2rem;
+}
+@media (max-width: 860px) and (min-width: 641px) {
+  .category-nav {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 6px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .category-nav::-webkit-scrollbar { display: none; }
+  .cat-card {
+    flex: 1 0 0;
+    min-width: 0;
+    padding: 14px 6px 12px;
+    scroll-snap-align: start;
+    gap: 6px;
+  }
+  .cat-desc { display: none; }
 }
 .cat-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 18px 12px 14px;
+  gap: 8px;
+  padding: 16px 8px 12px;
   background: var(--bg-card);
   border: 2px solid var(--border);
   border-radius: var(--radius);
@@ -236,6 +257,7 @@ body::before {
   position: relative;
   overflow: hidden;
   user-select: none;
+  min-width: 0;
 }
 .cat-card::before {
   content: '';
@@ -250,7 +272,7 @@ body::before {
 .cat-card.active { border-color: var(--cat-color, var(--accent)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cat-color, var(--accent)) 20%, transparent), var(--shadow); }
 .cat-card.active::before { opacity: 0.1; }
 .cat-icon {
-  font-size: 28px;
+  font-size: 24px;
   line-height: 1;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
   transition: transform 0.22s;
@@ -258,26 +280,47 @@ body::before {
 .cat-card:hover .cat-icon, .cat-card.active .cat-icon { transform: scale(1.15); }
 .cat-label {
   font-family: var(--font);
-  font-size: 12.5px;
+  font-size: 11.5px;
   font-weight: 600;
   color: var(--text-2);
   text-align: center;
   line-height: 1.3;
   position: relative;
   transition: color 0.22s;
+  word-break: break-word;
 }
 .cat-card.active .cat-label { color: var(--cat-color, var(--accent)); }
 .cat-desc {
-  font-size: 10.5px;
+  font-size: 10px;
   color: var(--text-3);
   text-align: center;
   line-height: 1.4;
   position: relative;
 }
-@media (max-width: 600px) {
-  .category-nav { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .cat-card { padding: 14px 8px 11px; }
-  .cat-icon { font-size: 22px; }
+/* Mobile: single scrollable row, no wrapping */
+@media (max-width: 640px) {
+  .category-nav {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 6px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .category-nav::-webkit-scrollbar { display: none; }
+  .cat-card {
+    flex: 1 0 0;
+    min-width: 0;
+    padding: 10px 4px 8px;
+    scroll-snap-align: start;
+    gap: 4px;
+    border-width: 1.5px;
+  }
+  .cat-icon { font-size: 18px; }
+  .cat-label { font-size: 9.5px; }
+  .cat-desc { display: none; }
 }
 
 /* SECTIONS */
@@ -695,6 +738,7 @@ textarea.form-input { resize: vertical; min-height: 90px; }
   50%       { opacity: 1;   }
 }
 </style>
+<base target="_blank">
 </head>
 <body>
 <!-- FULL PAGE LOADER -->
@@ -855,26 +899,7 @@ textarea.form-input { resize: vertical; min-height: 90px; }
 <!-- TOAST -->
 <div id="toast"></div>
 
-<!-- JOIN REQUEST MODAL -->
-<div class="modal-overlay" id="joinRequestOverlay">
-  <div class="modal">
-    <div class="modal-title">Request to join group</div>
-    <div style="gap: 14px; display: flex; flex-direction: column; margin-bottom: 1.5rem;">
-      <div style="display: flex; flex-direction: column; gap: 6px;">
-        <label class="form-label">Your name *</label>
-        <input class="form-input" id="jr-name" placeholder="Your full name" />
-      </div>
-      <div style="display: flex; flex-direction: column; gap: 6px;">
-        <label class="form-label">Message</label>
-        <textarea class="form-input" id="jr-msg" placeholder="Tell us why you want to join this group..." style="resize: vertical; min-height: 70px; max-height: 120px;"></textarea>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn" onclick="closeJoinRequest()">Cancel</button>
-      <button class="btn btn-primary" id="jr-submit" onclick="submitJoinRequest()">Send request</button>
-    </div>
-  </div>
-</div>
+
 
 <!-- CONFIRM MODAL -->
 <div class="modal-overlay" id="modalOverlay">
@@ -969,6 +994,13 @@ function init() {
     requests = data || {};
     if (!initialLoad) renderAll();
   });
+
+  // Listen to toast message from redirect
+  const pendingToast = load('connect-toast', null);
+  if (pendingToast) {
+    showToast(pendingToast);
+    localStorage.removeItem('connect-toast');
+  }
 
   // Fallback: hide loader after 6s even if Firebase is slow
   setTimeout(hideLoader, 6000);
@@ -1293,57 +1325,8 @@ function openJoinRequest(dbId) {
     return;
   }
   
-  pendingGroupId = dbId;
-  document.getElementById('jr-name').value = currentUser;
-  document.getElementById('jr-msg').value = '';
-  document.getElementById('joinRequestOverlay').classList.add('open');
-}
-
-function closeJoinRequest() {
-  document.getElementById('joinRequestOverlay').classList.remove('open');
-  pendingGroupId = null;
-}
-
-async function submitJoinRequest() {
-  if(!pendingGroupId) return;
-  const g = groups.find(x => x.dbId === pendingGroupId);
-  if(!g) { showToast('Group not found'); return; }
-
-  // SAFETY NET: Double-check for duplicate request
-  const groupRequests = requests[pendingGroupId] || {};
-  const alreadyRequested = Object.values(groupRequests).some(
-    r => r.requesterEmail === currentUser && (r.status === 'pending' || r.status === 'accepted')
-  );
-  if(alreadyRequested) {
-    showToast('You already sent a request to this group');
-    closeJoinRequest();
-    return;
-  }
-
-  const name = document.getElementById('jr-name').value.trim();
-  const msg = document.getElementById('jr-msg').value.trim();
-  
-  if(!name) { showToast('Please enter your name'); return; }
-  
-  const loadState = startButtonLoad('jr-submit', true);
-  try {
-    const requestId = db.ref().push().key;
-    const requestData = {
-      requesterName: name,
-      requesterMessage: msg,
-      requesterEmail: currentUser,
-      status: 'pending',
-      timestamp: new Date().toISOString()
-    };
-    await db.ref(`requests/${pendingGroupId}/${requestId}`).set(requestData);
-    showToast('Request sent! Admin will review it soon ✓');
-    closeJoinRequest();
-  } catch(err) {
-    console.error(err);
-    showToast('Failed to send request.');
-  } finally {
-    endButtonLoad(loadState);
-  }
+  // Navigate to the new join request page
+  window.location.href = `join-request.html?groupId=${dbId}`;
 }
 
 async function joinGroup(dbId) {
@@ -1456,7 +1439,7 @@ function renderAdmin() {
           html += `<div class="card" style="margin-bottom: 0.75rem;">
             <div style="margin-bottom: 0.75rem;">
               <div style="font-weight: 600; font-size: 14px; color: var(--text);">${r.requesterName}</div>
-              <div style="font-size: 12px; color: var(--text-3); margin-top: 2px;">${r.requesterEmail}</div>
+              <div style="font-size: 12px; color: var(--text-3); margin-top: 2px;">${r.requesterEmail} | <strong>WhatsApp:</strong> ${r.requesterWhatsApp || 'N/A'}</div>
             </div>
             ${r.requesterMessage ? `<div style="font-size: 13px; color: var(--text-2); margin-bottom: 0.75rem; padding: 8px 10px; background: var(--bg-secondary); border-radius: 6px; border-left: 3px solid var(--accent);">"${r.requesterMessage}"</div>` : ''}
             <div style="display: flex; gap: 8px;">
@@ -1475,7 +1458,7 @@ function renderAdmin() {
             <div style="display: flex; justify-content: space-between; align-items: start;">
               <div>
                 <div style="font-weight: 600; font-size: 14px; color: var(--text);">${r.requesterName}</div>
-                <div style="font-size: 12px; color: var(--text-3); margin-top: 2px;">${r.requesterEmail}</div>
+                <div style="font-size: 12px; color: var(--text-3); margin-top: 2px;">${r.requesterEmail} | <strong>WhatsApp:</strong> ${r.requesterWhatsApp || 'N/A'}</div>
               </div>
               <span class="badge badge-green">Accepted</span>
             </div>
@@ -1540,9 +1523,7 @@ async function rejectRequest(groupId, requestId) {
   }
 }
 
-document.getElementById('joinRequestOverlay').addEventListener('click', function(e) {
-  if(e.target === this) closeJoinRequest();
-});
+
 
 init();
 </script>
