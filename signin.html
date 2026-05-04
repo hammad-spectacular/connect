@@ -313,8 +313,7 @@
 
     async function signIn() {
       showError('');
-      const rawEmail = document.getElementById('email').value;
-      const email = rawEmail.toLowerCase().replace(/\s/g, "");
+      const email = document.getElementById('email').value.trim().toLowerCase();
       const password = document.getElementById('password').value;
       
       if (!email || !password) { showError('Please enter both email and password.'); return; }
