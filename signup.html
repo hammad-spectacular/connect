@@ -310,9 +310,11 @@
     async function signUp() {
       showError('');
       const name = document.getElementById('displayName').value.trim();
-      const email = document.getElementById('email').value.trim();
+      const email = document.getElementById('email').value.trim().toLowerCase();
       const password = document.getElementById('password').value;
+      
       if (!email || !password) { showError('Please enter email and password.'); return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('Please enter a valid email format.'); return; }
       if (password.length < 6) { showError('Password should be at least 6 characters.'); return; }
 
       const btn = document.getElementById('signUpBtn');
