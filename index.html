@@ -1599,39 +1599,72 @@
           const snapshot = await db.ref('groups').once('value');
           const data = snapshot.val();
           if (!data) return { deleted: 0, warned: 0 };
-          
+
           let deletedCount = 0;
           let warnedCount = 0;
           const now = new Date();
           const gracePeriod = 24 * 60 * 60 * 1000; // 24 hours grace period after expiry
-          
+
           for (const [key, g] of Object.entries(data)) {
+            let shouldDelete = false;
+            let reason = '';
+
+            // Check date-based expiry
             if (g.expiryDate) {
               const expiryDate = new Date(g.expiryDate);
               const isExpired = now > expiryDate;
               const expiredTime = now - expiryDate;
-              
+
               if (isExpired && expiredTime > gracePeriod) {
-                // Hard delete: expired more than 24 hours ago
-                await db.ref('groups/' + key).remove();
-                deletedCount++;
-              } else if (isExpired && g.creator === currentUser) {
-                // Soft warning: expired but within grace period
-                if (!g.warningShown) {
-                  showToast(`⚠️ Your group "${g.name}" has expired and will be deleted in 24 hours unless extended.`);
-                  await db.ref('groups/' + key).update({ warningShown: true });
-                  warnedCount++;
-                }
+                shouldDelete = true;
+                reason = 'date expired';
+              } else if (isExpired && g.creator === currentUser && !g.warningShown) {
+                showToast(`⚠️ Your group "${g.name}" has expired and will be deleted in 24 hours unless extended.`);
+                await db.ref('groups/' + key).update({ warningShown: true });
+                warnedCount++;
               }
             }
+
+            // Check full-group expiry (auto-expire when group becomes full)
+            if (!shouldDelete && g.fullExpiry) {
+              const fullExpiryDate = new Date(g.fullExpiry);
+              if (now > fullExpiryDate) {
+                shouldDelete = true;
+                reason = 'group full expiry';
+              }
+            }
+
+            // Also check if group is full and has no fullExpiry set (legacy groups)
+            if (!shouldDelete && g.members && g.members.length >= g.max && !g.fullExpiry) {
+              shouldDelete = true;
+              reason = 'group full (legacy)';
+            }
+
+            if (shouldDelete) {
+              console.log(`Auto-deleting group "${g.name}" - reason: ${reason}`);
+              await db.ref('groups/' + key).remove();
+              deletedCount++;
+            }
           }
-          
+
           return { deleted: deletedCount, warned: warnedCount };
         } catch (e) {
           console.error('Cleanup error:', e);
           return { deleted: 0, warned: 0 };
         }
       }
+
+      // AUTOMATIC BACKGROUND CLEANUP - Runs every 5 minutes
+      setInterval(async () => {
+        try {
+          const result = await cleanupExpiredGroups();
+          if (result.deleted > 0) {
+            console.log(`🧹 Automatic cleanup: Deleted ${result.deleted} expired group(s)`);
+          }
+        } catch (e) {
+          console.error('Background cleanup error:', e);
+        }
+      }, 5 * 60 * 1000); // 5 minutes
 
       // REALTIME DB LISTENER
       db.ref('groups').on('value', (snapshot) => {
@@ -1814,9 +1847,11 @@
       const now = new Date();
       const expiry = g.expiryDate ? new Date(g.expiryDate) : null;
       const isExpired = expiry && now > expiry;
+      const fullExpiry = g.fullExpiry ? new Date(g.fullExpiry) : null;
+      const isFullExpired = fullExpiry && now > fullExpiry;
 
       // Skip rendering expired groups completely - they should have been cleaned up
-      if (isExpired) {
+      if (isExpired || isFullExpired) {
         // Attempt immediate cleanup
         db.ref('groups/' + g.dbId).remove().catch(e => console.error('Cleanup error:', e));
         return '';
@@ -2007,8 +2042,20 @@
       const loadState = startButtonLoad(dbId);
       try {
         const newMembers = [...(g.members || []), currentUser];
-        await db.ref('groups/' + dbId).update({ members: newMembers });
-        showToast('Joined "' + g.name + '"! 🎉');
+        const updateData = { members: newMembers };
+
+        // If group becomes full after this join, set auto-expiry (1 hour grace period)
+        if (newMembers.length >= g.max) {
+          const fullExpiry = new Date();
+          fullExpiry.setHours(fullExpiry.getHours() + 1); // 1 hour grace period
+          updateData.fullExpiry = fullExpiry.toISOString();
+          updateData.fullExpiryAt = fullExpiry.getTime();
+          showToast('Joined "' + g.name + '"! Group is now full and will close in 1 hour. 🎉');
+        } else {
+          showToast('Joined "' + g.name + '"! 🎉');
+        }
+
+        await db.ref('groups/' + dbId).update(updateData);
       } catch (err) {
         console.error(err);
         showToast('Failed to join group.');
