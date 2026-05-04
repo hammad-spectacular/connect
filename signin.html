@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
-
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Connect — Peer Study Groups</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Connect — Sign In</title>
   <link rel="icon" type="image/png" href="favicon.png">
-  <link
-    href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
-    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
   <style>
     :root {
       --bg: #F7F5F0;
@@ -25,23 +22,16 @@
       --accent-bg: #EFF6FF;
       --accent-text: #1D4ED8;
       --accent-2: #7C3AED;
-      --green-bg: #F0FDF4;
-      --green-text: #166534;
-      --red-bg: #FEF2F2;
-      --red-text: #991B1B;
-      --amber-bg: #FFFBEB;
-      --amber-text: #92400E;
-      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-      --shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
-      --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow: 0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
       --radius: 14px;
-      --radius-sm: 8px;
+      --radius-sm: 10px;
       --radius-pill: 100px;
       --font: 'Sora', sans-serif;
       --font-body: 'DM Sans', sans-serif;
-      --transition: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition: 0.18s cubic-bezier(0.4,0,0.2,1);
     }
-
     [data-theme="dark"] {
       --bg: #0C0A09;
       --bg-card: #1C1917;
@@ -57,39 +47,23 @@
       --accent-bg: #1E3A5F;
       --accent-text: #93C5FD;
       --accent-2: #A78BFA;
-      --green-bg: #052E16;
-      --green-text: #86EFAC;
-      --red-bg: #450A0A;
-      --red-text: #FCA5A5;
-      --amber-bg: #451A03;
-      --amber-text: #FCD34D;
-      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-      --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-      --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+      --shadow: 0 4px 16px rgba(0,0,0,0.4);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
     }
-
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: var(--font-body);
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: background var(--transition), color var(--transition);
       -webkit-font-smoothing: antialiased;
+      padding: 1.25rem;
     }
-
-    /* NOISE TEXTURE OVERLAY */
     body::before {
       content: '';
       position: fixed;
@@ -99,8 +73,6 @@
       z-index: 0;
       opacity: 0.4;
     }
-
-    /* ANIMATED GRADIENT BG BLOBS */
     .bg-blob {
       position: fixed;
       border-radius: 50%;
@@ -110,1448 +82,190 @@
       z-index: 0;
       animation: blobFloat 12s ease-in-out infinite alternate;
     }
+    [data-theme="dark"] .bg-blob { opacity: 0.12; }
+    .bg-blob-1 { width: 500px; height: 500px; background: #2563EB; top: -100px; right: -100px; }
+    .bg-blob-2 { width: 400px; height: 400px; background: #7C3AED; bottom: -100px; left: -100px; }
+    @keyframes blobFloat { 0% { transform: translate(0,0) scale(1);} 100% { transform: translate(30px, 20px) scale(1.08);} }
 
-    [data-theme="dark"] .bg-blob {
-      opacity: 0.12;
-    }
-
-    .bg-blob-1 {
-      width: 500px;
-      height: 500px;
-      background: #2563EB;
-      top: -100px;
-      right: -100px;
-      animation-delay: 0s;
-    }
-
-    .bg-blob-2 {
-      width: 400px;
-      height: 400px;
-      background: #7C3AED;
-      bottom: 100px;
-      left: -80px;
-      animation-delay: -5s;
-    }
-
-    .bg-blob-3 {
-      width: 300px;
-      height: 300px;
-      background: #0891B2;
-      top: 50%;
-      left: 40%;
-      animation-delay: -9s;
-    }
-
-    @keyframes blobFloat {
-      0% {
-        transform: translate(0, 0) scale(1);
-      }
-
-      100% {
-        transform: translate(30px, 20px) scale(1.08);
-      }
-    }
-
-    .app-wrap {
+    .card {
       position: relative;
       z-index: 1;
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 2rem 1.25rem 4rem;
-    }
-
-    /* HEADER */
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 2rem;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .logo-area {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .logo {
-      font-family: var(--font);
-      font-size: 26px;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: -1px;
-      line-height: 1;
-    }
-
-    .logo .dot {
-      color: var(--accent);
-    }
-
-    .tagline {
-      font-size: 12px;
-      color: var(--text-3);
-      font-weight: 400;
-      letter-spacing: 0.3px;
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    /* THEME TOGGLE */
-    .theme-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border-2);
       background: var(--bg-card);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 17px;
-      transition: all var(--transition);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .theme-btn:hover {
-      transform: scale(1.07);
-      box-shadow: var(--shadow);
-    }
-
-    /* NAME INPUT AREA */
-    .name-wrap {
-      display: flex;
-      background: var(--bg-card);
-      border: 1px solid var(--border-2);
-      border-radius: var(--radius-sm);
-      overflow: hidden;
-      box-shadow: var(--shadow-sm);
-      transition: box-shadow var(--transition);
-    }
-
-    .name-wrap:focus-within {
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15), var(--shadow-sm);
-      border-color: var(--accent);
-    }
-
-    .name-input {
-      padding: 9px 14px;
-      border: none;
-      background: transparent;
-      font-size: 13px;
-      font-family: var(--font-body);
-      color: var(--text);
-      width: 150px;
-      outline: none;
-    }
-
-    .name-input::placeholder {
-      color: var(--text-3);
-    }
-
-    .name-btn {
-      padding: 9px 16px;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      font-size: 13px;
-      font-family: var(--font);
-      font-weight: 600;
-      cursor: pointer;
-      transition: background var(--transition), transform var(--transition);
-      white-space: nowrap;
-    }
-
-    .name-btn:hover {
-      background: var(--accent-2);
-    }
-
-    .name-btn:active {
-      transform: scale(0.97);
-    }
-
-    /* USER BAR */
-    .user-bar {
-      display: none;
-      align-items: center;
-      gap: 10px;
-      background: var(--accent-bg);
-      border: 1px solid;
-      border-color: color-mix(in srgb, var(--accent) 30%, transparent);
-      border-radius: var(--radius-sm);
-      padding: 10px 16px;
-      margin-bottom: 1.5rem;
-      font-size: 13px;
-      color: var(--accent-text);
-      font-weight: 500;
-      animation: slideDown 0.3s ease;
-    }
-
-    @keyframes slideDown {
-      from {
-        opacity: 0;
-        transform: translateY(-8px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .avatar {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      background: var(--accent);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-family: var(--font);
-      font-weight: 700;
-      flex-shrink: 0;
-    }
-
-    /* CATEGORY NAV */
-    .category-nav {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 10px;
-      margin-bottom: 2rem;
-    }
-
-    @media (max-width: 860px) and (min-width: 641px) {
-      .category-nav {
-        display: flex;
-        flex-direction: row;
-        overflow-x: auto;
-        gap: 8px;
-        padding-bottom: 6px;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-      }
-
-      .category-nav::-webkit-scrollbar {
-        display: none;
-      }
-
-      .cat-card {
-        flex: 0 0 auto;
-        width: 100px;
-        padding: 14px 6px 12px;
-        scroll-snap-align: start;
-        gap: 6px;
-      }
-
-      .cat-desc {
-        display: none;
-      }
-    }
-
-    .cat-card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      padding: 16px 8px 12px;
-      background: var(--bg-card);
-      border: 2px solid var(--border);
+      border: 1px solid var(--border);
       border-radius: var(--radius);
-      cursor: pointer;
-      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: var(--shadow-sm);
-      position: relative;
-      overflow: hidden;
-      user-select: none;
-      min-width: 0;
-    }
-
-    .cat-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: var(--cat-color, var(--accent));
-      opacity: 0;
-      transition: opacity 0.22s;
-    }
-
-    .cat-card:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--shadow);
-      border-color: var(--cat-color, var(--accent));
-    }
-
-    .cat-card:hover::before {
-      opacity: 0.06;
-    }
-
-    .cat-card.active {
-      border-color: var(--cat-color, var(--accent));
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--cat-color, var(--accent)) 20%, transparent), var(--shadow);
-    }
-
-    .cat-card.active::before {
-      opacity: 0.1;
-    }
-
-    .cat-icon {
-      font-size: 24px;
-      line-height: 1;
-      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-      transition: transform 0.22s;
-    }
-
-    .cat-card:hover .cat-icon,
-    .cat-card.active .cat-icon {
-      transform: scale(1.15);
-    }
-
-    .cat-label {
-      font-family: var(--font);
-      font-size: 11.5px;
-      font-weight: 600;
-      color: var(--text-2);
-      text-align: center;
-      line-height: 1.3;
-      position: relative;
-      transition: color 0.22s;
-      word-break: break-word;
-    }
-
-    .cat-card.active .cat-label {
-      color: var(--cat-color, var(--accent));
-    }
-
-    .cat-desc {
-      font-size: 10px;
-      color: var(--text-3);
-      text-align: center;
-      line-height: 1.4;
-      position: relative;
-    }
-
-    /* Mobile: single scrollable row, no wrapping */
-    @media (max-width: 640px) {
-      .category-nav {
-        display: flex;
-        flex-direction: row;
-        overflow-x: auto;
-        gap: 8px;
-        padding-bottom: 6px;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-      }
-
-      .category-nav::-webkit-scrollbar {
-        display: none;
-      }
-
-      .cat-card {
-        flex: 0 0 auto;
-        width: 80px;
-        padding: 10px 4px 8px;
-        scroll-snap-align: start;
-        gap: 4px;
-        border-width: 1.5px;
-      }
-
-      .cat-icon {
-        font-size: 18px;
-      }
-
-      .cat-label {
-        font-size: 9.5px;
-      }
-
-      .cat-desc {
-        display: none;
-      }
-    }
-
-    /* SECTIONS */
-    .section {
-      display: none;
-      animation: fadeUp 0.25s ease;
-    }
-
-    .section.active {
-      display: block;
-    }
-
-    @keyframes fadeUp {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* SEARCH */
-    .search-wrap {
-      position: relative;
-      margin-bottom: 1rem;
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-3);
-      font-size: 15px;
-      pointer-events: none;
-      transition: opacity 0.2s;
-    }
-
-    .search-bar {
+      padding: 2.25rem;
       width: 100%;
-      padding: 11px 44px 11px 40px;
-      background: var(--bg-card);
+      max-width: 420px;
+      box-shadow: var(--shadow-lg);
+    }
+    .top { text-align: center; margin-bottom: 1.75rem; }
+    .logo { font-family: var(--font); font-size: 28px; font-weight: 800; letter-spacing: -1.5px; margin-bottom: 0.5rem; }
+    .logo .dot { color: var(--accent); }
+    
+    h1 { font-family: var(--font); font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
+    .muted { color: var(--text-2); font-size: 14px; line-height: 1.5; margin-bottom: 1.5rem; }
+    
+    .form { display: grid; gap: 16px; }
+    .label { font-size: 11px; font-family: var(--font); font-weight: 700; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; display: block; }
+    .input {
+      width: 100%;
+      padding: 12px 14px;
       border: 1px solid var(--border-2);
       border-radius: var(--radius-sm);
-      font-size: 14px;
-      font-family: var(--font-body);
-      color: var(--text);
-      box-shadow: var(--shadow-sm);
-      outline: none;
-      transition: all var(--transition);
-    }
-
-    .search-bar:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12), var(--shadow-sm);
-    }
-
-    .search-bar::placeholder {
-      color: var(--text-3);
-    }
-
-    /* Search spinner inside bar */
-    .search-spinner {
-      position: absolute;
-      right: 13px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 16px;
-      height: 16px;
-      border: 2px solid var(--border-2);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      opacity: 0;
-      transition: opacity 0.15s;
-      pointer-events: none;
-    }
-
-    .search-spinner.visible {
-      opacity: 1;
-    }
-
-    /* Search results flash bar */
-    .search-result-bar {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 12px;
-      color: var(--accent-text);
-      font-weight: 500;
-      padding: 6px 10px;
-      background: var(--accent-bg);
-      border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
-      border-radius: 6px;
-      margin-bottom: 10px;
-      animation: fadeUp 0.2s ease;
-      transition: opacity 0.3s;
-    }
-
-    .search-result-bar.hidden {
-      display: none;
-    }
-
-    /* FILTER CHIPS */
-    .filter-row {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-bottom: 1.25rem;
-    }
-
-    .chip {
-      padding: 5px 14px;
-      border-radius: var(--radius-pill);
-      border: 1px solid var(--border-2);
-      font-size: 12px;
-      font-family: var(--font);
-      font-weight: 500;
-      cursor: pointer;
-      background: var(--bg-card);
-      color: var(--text-2);
-      transition: all var(--transition);
-    }
-
-    .chip:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    .chip.active {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
-      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
-    }
-
-    /* CARDS */
-    .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.4rem;
-      margin-bottom: 1rem;
-      box-shadow: var(--shadow-sm);
-      transition: all var(--transition);
-      position: relative;
-      overflow: visible;
-    }
-
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2));
-      opacity: 0;
-      transition: opacity var(--transition);
-    }
-
-    .card:hover {
-      box-shadow: var(--shadow);
-      transform: translateY(-1px);
-      border-color: var(--border-2);
-    }
-
-    .card:hover::before {
-      opacity: 1;
-    }
-
-    .card-head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 10px;
-    }
-
-    .card-title {
-      font-family: var(--font);
       font-size: 15px;
-      font-weight: 600;
-      color: var(--text);
-      line-height: 1.3;
-    }
-
-    .card-sub {
-      font-size: 12px;
-      color: var(--text-3);
-      margin-top: 3px;
-      font-weight: 400;
-    }
-
-    .badge-row {
-      display: flex;
-      gap: 5px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      flex-shrink: 1;
-      max-width: 52%;
-    }
-
-    @media (max-width: 600px) {
-
-      /* Prevent badge overflow on small screens */
-      .card-head {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .badge-row {
-        justify-content: flex-start;
-        max-width: 100%;
-      }
-    }
-
-    /* BADGES */
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 3px 10px;
-      border-radius: var(--radius-pill);
-      font-size: 11px;
-      font-family: var(--font);
-      font-weight: 600;
-      letter-spacing: 0.2px;
-      white-space: nowrap;
-    }
-
-    .badge-blue {
-      background: var(--accent-bg);
-      color: var(--accent-text);
-    }
-
-    .badge-green {
-      background: var(--green-bg);
-      color: var(--green-text);
-    }
-
-    .badge-red {
-      background: var(--red-bg);
-      color: var(--red-text);
-    }
-
-    .badge-amber {
-      background: var(--amber-bg);
-      color: var(--amber-text);
-    }
-
-    /* CARD META */
-    .meta-row {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-      margin: 10px 0;
-    }
-
-    .meta-item {
-      font-size: 12px;
-      color: var(--text-2);
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .card-desc {
-      font-size: 13px;
-      color: var(--text-2);
-      line-height: 1.6;
-      margin-bottom: 10px;
-    }
-
-    /* MEMBERS */
-    .members-list {
-      display: flex;
-      gap: 5px;
-      flex-wrap: wrap;
-      margin-top: 10px;
-      margin-bottom: 2px;
-    }
-
-    .m-chip {
-      padding: 3px 10px;
-      border-radius: var(--radius-pill);
-      font-size: 11px;
-      font-weight: 500;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      color: var(--text-2);
-      transition: all var(--transition);
-    }
-
-    .m-chip.you {
-      background: var(--accent-bg);
-      border-color: color-mix(in srgb, var(--accent) 30%, transparent);
-      color: var(--accent-text);
-    }
-
-    /* CARD ACTIONS */
-    .card-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 14px;
-      padding-top: 12px;
-      border-top: 1px solid var(--border);
-    }
-
-    /* BUTTONS */
-    .btn {
-      padding: 8px 18px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border-2);
-      font-size: 13px;
-      font-family: var(--font);
-      font-weight: 500;
-      cursor: pointer;
-      background: var(--bg-secondary);
-      color: var(--text);
-      transition: all var(--transition);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn:hover {
-      background: var(--bg-hover);
-      border-color: var(--border-2);
-      transform: translateY(-1px);
-    }
-
-    .btn:active {
-      transform: scale(0.97) translateY(0);
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
-      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
-    }
-
-    .btn-primary:hover {
-      background: var(--accent-2);
-      border-color: var(--accent-2);
-      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
-    }
-
-    .btn-danger {
-      background: var(--red-bg);
-      color: var(--red-text);
-      border-color: color-mix(in srgb, var(--red-text) 20%, transparent);
-    }
-
-    .btn-danger:hover {
-      filter: brightness(0.92);
-    }
-
-    .btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    /* FORM */
-    .form-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.75rem;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .form-title {
-      font-family: var(--font);
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 1.5rem;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .form-label {
-      font-size: 11px;
-      font-family: var(--font);
-      font-weight: 600;
-      color: var(--text-2);
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-    }
-
-    .form-input {
-      padding: 10px 13px;
-      border: 1px solid var(--border-2);
-      border-radius: var(--radius-sm);
-      font-size: 14px;
       font-family: var(--font-body);
       background: var(--bg-input);
       color: var(--text);
       outline: none;
       transition: all var(--transition);
     }
-
-    .form-input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-    }
-
-    .form-input::placeholder {
-      color: var(--text-3);
-    }
-
-    select.form-input {
-      cursor: pointer;
-    }
-
-    textarea.form-input {
-      resize: vertical;
-      min-height: 90px;
-    }
-
-    .form-full {
-      grid-column: 1 / -1;
-    }
-
-    .form-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 4px;
-    }
-
-    .form-error {
-      margin-top: 12px;
-      padding: 10px 14px;
-      background: var(--red-bg);
-      border: 1px solid color-mix(in srgb, var(--red-text) 20%, transparent);
-      border-radius: var(--radius-sm);
-      font-size: 13px;
-      color: var(--red-text);
-      display: none;
-      animation: slideDown 0.2s ease;
-    }
-
-    /* STATS */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-bottom: 1.5rem;
-    }
-
-    .stat-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.4rem;
-      text-align: center;
-      box-shadow: var(--shadow-sm);
-      transition: all var(--transition);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .stat-card::after {
-      content: '';
+    .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
+    
+    .pw-wrap { position: relative; }
+    .pw-wrap .input { padding-right: 44px; }
+    .pw-toggle {
       position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2));
-      transform: scaleX(0);
-      transition: transform 0.4s ease;
+      right: 12px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: var(--text-3); font-size: 18px; padding: 4px;
+      transition: color var(--transition);
     }
+    .pw-toggle:hover { color: var(--text-2); }
 
-    .stat-card:hover::after {
-      transform: scaleX(1);
-    }
-
-    .stat-card:hover {
-      box-shadow: var(--shadow);
-      transform: translateY(-2px);
-    }
-
-    .stat-num {
-      font-family: var(--font);
-      font-size: 38px;
-      font-weight: 700;
-      color: var(--text);
-      line-height: 1;
-    }
-
-    .stat-label {
-      font-size: 12px;
-      color: var(--text-3);
+    .forgot-link {
+      display: block;
       margin-top: 6px;
-      font-weight: 500;
-      font-family: var(--font);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .dept-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.4rem;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .dept-title {
-      font-family: var(--font);
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 1rem;
-    }
-
-    .dept-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .dept-label {
-      font-size: 13px;
-      color: var(--text);
-      font-weight: 500;
-      flex: 1;
-      min-width: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .dept-bar-wrap {
-      flex: 2;
-      height: 6px;
-      background: var(--bg-secondary);
-      border-radius: var(--radius-pill);
-      overflow: hidden;
-    }
-
-    .dept-bar {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2));
-      border-radius: var(--radius-pill);
-      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .dept-count {
       font-size: 12px;
-      color: var(--text-3);
-      font-weight: 600;
-      min-width: 20px;
-      text-align: right;
-      font-family: var(--font);
-    }
-
-    /* EMPTY STATE */
-    .empty {
-      text-align: center;
-      padding: 4rem 1rem;
-      color: var(--text-3);
-    }
-
-    .empty-icon {
-      font-size: 40px;
-      margin-bottom: 12px;
-      opacity: 0.5;
-    }
-
-    .empty-title {
-      font-family: var(--font);
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--text-2);
-      margin-bottom: 6px;
-    }
-
-    .empty-sub {
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    /* TOAST */
-    #toast {
-      position: fixed;
-      bottom: 28px;
-      right: 28px;
-      background: var(--text);
-      color: var(--bg);
-      padding: 11px 20px;
-      border-radius: var(--radius-sm);
-      font-size: 13px;
-      font-family: var(--font);
-      font-weight: 500;
-      opacity: 0;
-      transform: translateY(12px);
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      pointer-events: none;
-      z-index: 9999;
-      box-shadow: var(--shadow-lg);
-      max-width: 280px;
-    }
-
-    #toast.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* SCROLLBAR */
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: var(--border-2);
-      border-radius: 3px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--text-3);
-    }
-
-    /* MODAL CONFIRM */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(4px);
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transition: opacity 0.2s;
-      pointer-events: none;
-    }
-
-    .modal-overlay.open {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    .modal {
-      background: var(--bg-card);
-      border: 1px solid var(--border-2);
-      border-radius: var(--radius);
-      padding: 1.75rem;
-      max-width: 380px;
-      width: 90%;
-      box-shadow: var(--shadow-lg);
-      transform: scale(0.95) translateY(10px);
-      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .modal-overlay.open .modal {
-      transform: scale(1) translateY(0);
-    }
-
-    .modal-title {
-      font-family: var(--font);
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .modal-text {
-      font-size: 14px;
-      color: var(--text-2);
-      margin-bottom: 1.25rem;
-      line-height: 1.5;
-    }
-
-    .modal-actions {
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-    }
-
-    @media (max-width: 600px) {
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .tabs {
-        width: 100%;
-      }
-
-      .tab {
-        flex: 1;
-        text-align: center;
-        padding: 8px 10px;
-        font-size: 12px;
-      }
-
-      .header {
-        gap: 12px;
-      }
-    }
-
-    /* SPINNER & LOADING STATES */
-    .spinner {
-      display: inline-block;
-      width: 14px;
-      height: 14px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      border-top-color: currentColor;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    .btn.loading {
-      position: relative;
-      pointer-events: none;
-      opacity: 0.7;
-    }
-
-    .btn-primary.loading .spinner {
-      border-top-color: #fff;
-    }
-
-    .btn:not(.btn-primary).loading .spinner {
-      border-color: rgba(0, 0, 0, 0.1);
-      border-top-color: var(--text);
-    }
-
-    [data-theme="dark"] .btn:not(.btn-primary).loading .spinner {
-      border-color: rgba(255, 255, 255, 0.1);
-      border-top-color: var(--text);
-    }
-
-    /* FULL PAGE LOADER */
-    #page-loader {
-      position: fixed;
-      inset: 0;
-      z-index: 99999;
-      background: var(--bg);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 28px;
-      transition: opacity 0.5s ease, visibility 0.5s ease;
-    }
-
-    #page-loader.hidden {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
-
-    .loader-ring {
-      position: relative;
-      width: 72px;
-      height: 72px;
-    }
-
-    .loader-ring::before,
-    .loader-ring::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      border: 4px solid transparent;
-    }
-
-    .loader-ring::before {
-      border-top-color: var(--accent);
-      border-right-color: var(--accent);
-      animation: spin 0.9s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-    }
-
-    .loader-ring::after {
-      border-bottom-color: var(--accent-2);
-      border-left-color: var(--accent-2);
-      animation: spin 1.4s cubic-bezier(0.5, 0, 0.5, 1) infinite reverse;
-      opacity: 0.55;
-    }
-
-    .loader-logo {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: var(--font);
-      font-size: 18px;
-      font-weight: 700;
       color: var(--accent);
-      letter-spacing: -1px;
+      text-decoration: none;
+      font-weight: 600;
+      text-align: right;
     }
+    .forgot-link:hover { text-decoration: underline; color: var(--accent-2); }
 
-    .loader-text {
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
       font-family: var(--font);
+      font-weight: 700;
       font-size: 14px;
-      font-weight: 500;
-      color: var(--text-3);
-      letter-spacing: 0.3px;
-      animation: loaderPulse 1.4s ease-in-out infinite;
+      transition: all var(--transition);
+      box-shadow: 0 4px 12px rgba(37,99,235,0.25);
+      display: flex; align-items: center; justify-content: center; gap: 10px;
     }
-
-    .loader-dots::after {
-      content: '';
-      animation: dots 1.4s steps(4, end) infinite;
+    .btn:hover { background: var(--accent-2); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(124,58,237,0.32); }
+    .btn:active { transform: scale(0.98) translateY(0); }
+    .btn.loading { pointer-events: none; opacity: 0.8; }
+    
+    .btn-google {
+      background: var(--bg-card);
+      color: var(--text);
+      border-color: var(--border-2);
+      box-shadow: var(--shadow-sm);
+      margin-top: 8px;
     }
+    .btn-google:hover { background: var(--bg-secondary); border-color: var(--border-2); box-shadow: var(--shadow); }
+    .btn-google img { width: 18px; height: 18px; }
 
-    @keyframes dots {
-      0% {
-        content: '';
-      }
-
-      25% {
-        content: '.';
-      }
-
-      50% {
-        content: '..';
-      }
-
-      75% {
-        content: '...';
-      }
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      color: var(--text-3); font-size: 12px; font-weight: 500;
+      margin: 8px 0;
     }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-    @keyframes loaderPulse {
+    .links { margin-top: 1.75rem; text-align: center; font-size: 14px; color: var(--text-3); }
+    .links a { color: var(--accent); text-decoration: none; font-weight: 600; transition: color var(--transition); }
+    .links a:hover { color: var(--accent-2); text-decoration: underline; }
 
-      0%,
-      100% {
-        opacity: 0.5;
-      }
-
-      50% {
-        opacity: 1;
-      }
+    .err {
+      display: none;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      color: #b91c1c;
+      font-size: 13px;
+      line-height: 1.45;
+      margin-top: 8px;
     }
+    [data-theme="dark"] .err { color: #fca5a5; background: rgba(239,68,68,0.16); }
+
+    .theme-toggle {
+      position: fixed; top: 1.5rem; right: 1.5rem;
+      width: 40px; height: 40px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-2);
+      background: var(--bg-card);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      transition: all var(--transition);
+      box-shadow: var(--shadow-sm);
+      z-index: 100;
+    }
+    .theme-toggle:hover { transform: scale(1.07); box-shadow: var(--shadow); }
+
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: currentColor; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
-
 <body>
-  <!-- FULL PAGE LOADER -->
-  <div id="page-loader">
-    <div class="loader-ring">
-      <div class="loader-logo">C.</div>
-    </div>
-    <div class="loader-text">Loading groups<span class="loader-dots"></span></div>
-  </div>
-
   <div class="bg-blob bg-blob-1"></div>
   <div class="bg-blob bg-blob-2"></div>
-  <div class="bg-blob bg-blob-3"></div>
+  
+  <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()">🌙</button>
 
-  <div class="app-wrap">
-    <!-- HEADER -->
-    <header class="header">
-      <div class="logo-area">
-        <div class="logo">Connect<span class="dot">.</span></div>
-        <div class="tagline">Find your study group &mdash; grow together</div>
-      </div>
-      <div class="header-right">
-        <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
-        <button class="btn btn-danger" onclick="logout()" style="font-size:13px; padding: 8px 14px;">Logout</button>
-      </div>
-    </header>
+  <div class="card">
+    <div class="top">
+      <div class="logo">Connect<span class="dot">.</span></div>
+    </div>
+    
+    <h1>Welcome Back</h1>
+    <p class="muted">Sign in to access your study groups and stay connected.</p>
 
-    <!-- USER BAR -->
-    <div class="user-bar" id="userBar">
-      <div style="display:flex; align-items:center; gap: 10px; flex: 1;">
-        <div class="avatar" id="avatarEl">?</div>
-        <span id="userLabel">Welcome —</span>
+    <div class="form">
+      <div>
+        <label class="label">Email Address</label>
+        <input class="input" id="email" type="text" placeholder="you@example.com" autocomplete="email" inputmode="email" />
       </div>
-      <button class="btn btn-danger" onclick="logout()" style="font-size:12px; padding: 6px 12px;">Logout</button>
+      
+      <div>
+        <label class="label">Password</label>
+        <div class="pw-wrap">
+          <input class="input" id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
+          <button class="pw-toggle" onclick="togglePw('password', this)" type="button">👁</button>
+        </div>
+        <a href="forgotpassword.html" class="forgot-link">Forgot password?</a>
+      </div>
+      
+      <button class="btn" id="signInBtn" onclick="signIn()">Sign In</button>
+      
+      <div class="divider">or</div>
+      
+      <button class="btn btn-google" id="googleBtn" onclick="signInWithGoogle()">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+        Continue with Google
+      </button>
+
+      <div class="err" id="errBox"></div>
     </div>
 
-    <!-- CATEGORY NAV -->
-    <nav class="category-nav">
-      <button class="cat-card active" style="--cat-color:#2563EB" onclick="switchTab('browse')" id="cat-browse">
-        <span class="cat-icon">🔍</span>
-        <span class="cat-label">Browse Groups</span>
-        <span class="cat-desc">Explore &amp; join existing study groups</span>
-      </button>
-      <button class="cat-card" style="--cat-color:#7C3AED" onclick="switchTab('create')" id="cat-create">
-        <span class="cat-icon">✏️</span>
-        <span class="cat-label">Create a Group</span>
-        <span class="cat-desc">Start your own group for any subject</span>
-      </button>
-      <button class="cat-card" style="--cat-color:#059669" onclick="switchTab('mine')" id="cat-mine">
-        <span class="cat-icon">📚</span>
-        <span class="cat-label">My Groups</span>
-        <span class="cat-desc">Groups you created or joined</span>
-      </button>
-      <button class="cat-card" style="--cat-color:#D97706" onclick="switchTab('stats')" id="cat-stats">
-        <span class="cat-icon">📊</span>
-        <span class="cat-label">Overview</span>
-        <span class="cat-desc">Stats &amp; activity at a glance</span>
-      </button>
-      <button class="cat-card" style="--cat-color:#DC2626" onclick="switchTab('admin')" id="cat-admin">
-        <span class="cat-icon">⚙️</span>
-        <span class="cat-label">Admin Panel</span>
-        <span class="cat-desc">Manage join requests for your groups</span>
-      </button>
-    </nav>
-
-    <!-- BROWSE -->
-    <div class="section active" id="tab-browse">
-      <div class="search-wrap">
-        <span class="search-icon">🔍</span>
-        <input class="search-bar" id="searchInput" placeholder="Search subject, topic or department…"
-          oninput="onSearchInput()" />
-        <span class="search-spinner" id="searchSpinner"></span>
-      </div>
-      <div class="search-result-bar hidden" id="searchResultBar">✅ <span id="searchResultText"></span></div>
-      <div class="filter-row" id="filterRow"></div>
-      <div id="groupsList"></div>
-    </div>
-
-    <!-- CREATE -->
-    <div class="section" id="tab-create">
-      <div class="form-card">
-        <div class="form-title">Create a study group</div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">Group name *</label>
-            <input class="form-input" id="f-name" placeholder="e.g. HCI Final Prep" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Subject / Course *</label>
-            <input class="form-input" id="f-subject" placeholder="e.g. Human Computer Interaction" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Department</label>
-            <select class="form-input" id="f-dept">
-              <option value="">Select department</option>
-              <option>Software Engineering</option>
-              <option>Computer Science</option>
-              <option>Electrical Engineering</option>
-              <option>Business Administration</option>
-              <option>Data Science</option>
-              <option>Cybersecurity</option>
-              <option>Other</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Max members</label>
-            <input class="form-input" id="f-max" type="number" min="2" max="20" value="6" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Session date & time</label>
-            <input class="form-input" id="f-time" type="datetime-local" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Join deadline (expiry date) *</label>
-            <input class="form-input" id="f-expiry" type="date" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Location / Platform</label>
-            <input class="form-input" id="f-location" placeholder="Library Room 3 / Google Meet" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Your WhatsApp Number *</label>
-            <input class="form-input" id="f-whatsapp" type="tel" placeholder="+92 300 1234567" />
-          </div>
-          <div class="form-group form-full">
-            <label class="form-label">Description</label>
-            <textarea class="form-input" id="f-desc"
-              placeholder="What will the group focus on? Any requirements or prerequisites?"></textarea>
-          </div>
-        </div>
-        <div class="form-actions" style="margin-top:1.25rem">
-          <button class="btn btn-primary" onclick="createGroup()">✦ Create group</button>
-          <button class="btn" onclick="clearForm()">Clear</button>
-        </div>
-        <div class="form-error" id="form-error"></div>
-      </div>
-    </div>
-
-    <!-- MY GROUPS -->
-    <div class="section" id="tab-mine">
-      <div id="myGroupsList"></div>
-    </div>
-
-    <!-- STATS -->
-    <div class="section" id="tab-stats">
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-num" id="st-total">0</div>
-          <div class="stat-label">Total groups</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num" id="st-members">0</div>
-          <div class="stat-label">Total members</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num" id="st-open">0</div>
-          <div class="stat-label">Open spots</div>
-        </div>
-      </div>
-      <div id="dept-breakdown"></div>
-    </div>
-
-    <!-- ADMIN PANEL -->
-    <div class="section" id="tab-admin">
-      <div id="adminPanel"></div>
+    <div class="links">
+      Don't have an account? <a href="signup.html">Create one</a>
     </div>
   </div>
 
-  <!-- TOAST -->
-  <div id="toast"></div>
-
-
-
-  <!-- CONFIRM MODAL -->
-  <div class="modal-overlay" id="modalOverlay">
-    <div class="modal">
-      <div class="modal-title">Delete this group?</div>
-      <div class="modal-text">This action cannot be undone. All members will lose access to this group.</div>
-      <div class="modal-actions">
-        <button class="btn" onclick="closeModal()">Cancel</button>
-        <button class="btn btn-danger" id="modalConfirmBtn">Delete</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- EXTEND DEADLINE MODAL -->
-  <div class="modal-overlay" id="extendModalOverlay">
-    <div class="modal">
-      <div class="modal-title">Extend Group Deadline</div>
-      <div class="modal-text" id="extendModalText">Select a new expiry date for this group</div>
-      <div style="margin-bottom: 1.25rem;">
-        <label class="form-label" style="display: block; margin-bottom: 6px;">New expiry date *</label>
-        <input class="form-input" id="extendNewDate" type="date" />
-      </div>
-      <div class="modal-actions">
-        <button class="btn" onclick="closeExtendModal()">Cancel</button>
-        <button class="btn btn-primary" id="extendConfirmBtn" onclick="submitExtendDeadline()">Extend</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- FIREBASE SDKS -->
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
 
   <script>
-    // FIREBASE INIT
     const firebaseConfig = {
       apiKey: "AIzaSyAOGEcSTVKpQJHCtvWI0qeMNq54W38pPEE",
       authDomain: "connect-f1907.firebaseapp.com",
@@ -1563,774 +277,86 @@
       measurementId: "G-820XY1PEWX"
     };
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
 
-    let currentUser = '', groups = [], requests = {}, activeFilter = 'All', isDark = false, pendingDeleteId = null, pendingGroupId = null;
-    let initialLoad = true;
+    let isDark = false;
+    function save(key, val) { try { localStorage.setItem(key, val); } catch(e){} }
+    function load(key, fallback) { try { const v = localStorage.getItem(key); return v !== null ? v : fallback; } catch(e){ return fallback; } }
 
-    // LOCAL STORAGE (For User & Theme)
-    function save(key, val) { try { localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val)); } catch (e) { } }
-    function load(key, fallback) { try { const v = localStorage.getItem(key); return v !== null ? v : fallback; } catch (e) { return fallback; } }
-
-    function hideLoader() {
-      const loader = document.getElementById('page-loader');
-      if (loader) loader.classList.add('hidden');
-    }
-
-    function init() {
-      auth.onAuthStateChanged((user) => {
-        if (user) {
-          currentUser = user.displayName || user.email;
-          save('connect-user', currentUser);
-          applyUser();
-          renderAll();
-        } else {
-          window.location.href = 'landing.html';
-        }
-      });
-
-      isDark = load('connect-theme', 'light') === 'dark';
-      applyTheme();
-
-      // AUTO-CLEANUP FUNCTION - Warns admin then deletes expired groups after grace period
-      async function cleanupExpiredGroups() {
-        try {
-          const snapshot = await db.ref('groups').once('value');
-          const data = snapshot.val();
-          if (!data) return { deleted: 0, warned: 0 };
-
-          let deletedCount = 0;
-          let warnedCount = 0;
-          const now = new Date();
-          const gracePeriod = 24 * 60 * 60 * 1000; // 24 hours grace period after expiry
-
-          for (const [key, g] of Object.entries(data)) {
-            let shouldDelete = false;
-            let reason = '';
-
-            // Check date-based expiry
-            if (g.expiryDate) {
-              const expiryDate = new Date(g.expiryDate);
-              const isExpired = now > expiryDate;
-              const expiredTime = now - expiryDate;
-
-              if (isExpired && expiredTime > gracePeriod) {
-                shouldDelete = true;
-                reason = 'date expired';
-              } else if (isExpired && g.creator === currentUser && !g.warningShown) {
-                showToast(`⚠️ Your group "${g.name}" has expired and will be deleted in 24 hours unless extended.`);
-                await db.ref('groups/' + key).update({ warningShown: true });
-                warnedCount++;
-              }
-            }
-
-            // Check full-group expiry (auto-expire when group becomes full)
-            if (!shouldDelete && g.fullExpiry) {
-              const fullExpiryDate = new Date(g.fullExpiry);
-              if (now > fullExpiryDate) {
-                shouldDelete = true;
-                reason = 'group full expiry';
-              }
-            }
-
-            // Also check if group is full and has no fullExpiry set (legacy groups)
-            if (!shouldDelete && g.members && g.members.length >= g.max && !g.fullExpiry) {
-              shouldDelete = true;
-              reason = 'group full (legacy)';
-            }
-
-            if (shouldDelete) {
-              console.log(`Auto-deleting group "${g.name}" - reason: ${reason}`);
-              await db.ref('groups/' + key).remove();
-              deletedCount++;
-            }
-          }
-
-          return { deleted: deletedCount, warned: warnedCount };
-        } catch (e) {
-          console.error('Cleanup error:', e);
-          return { deleted: 0, warned: 0 };
-        }
-      }
-
-      // AUTOMATIC BACKGROUND CLEANUP - Runs every 5 minutes
-      setInterval(async () => {
-        try {
-          const result = await cleanupExpiredGroups();
-          if (result.deleted > 0) {
-            console.log(`🧹 Automatic cleanup: Deleted ${result.deleted} expired group(s)`);
-          }
-        } catch (e) {
-          console.error('Background cleanup error:', e);
-        }
-      }, 5 * 60 * 1000); // 5 minutes
-
-      // REALTIME DB LISTENER
-      db.ref('groups').on('value', (snapshot) => {
-        initialLoad = false;
-        const data = snapshot.val();
-        if (data) {
-          groups = Object.keys(data).map(key => ({ dbId: key, ...data[key] }));
-          groups.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-          // AUTO-CLEANUP: Delete expired groups (runs once per load)
-          cleanupExpiredGroups().catch(e => console.error('Cleanup error:', e));
-        } else {
-          groups = [];
-        }
-        renderAll();
-        hideLoader();
-      }, (err) => {
-        console.error(err);
-        showToast('Failed to connect to database');
-        initialLoad = false;
-        renderAll();
-        hideLoader();
-      });
-
-      // LISTEN TO REQUESTS
-      db.ref('requests').on('value', (snapshot) => {
-        const data = snapshot.val();
-        requests = data || {};
-        if (!initialLoad) renderAll();
-      });
-
-      // Listen to toast message from redirect
-      const pendingToast = load('connect-toast', null);
-      if (pendingToast) {
-        showToast(pendingToast);
-        localStorage.removeItem('connect-toast');
-      }
-
-      // Fallback: hide loader after 6s even if Firebase is slow
-      setTimeout(hideLoader, 6000);
-    }
-
-    function renderAll() { renderGroups(); renderMyGroups(); renderStats(); renderFilters(); renderAdmin(); }
-
-    /* THEME & USER */
-    function toggleTheme() {
-      isDark = !isDark;
-      applyTheme();
-      save('connect-theme', isDark ? 'dark' : 'light');
-    }
     function applyTheme() {
       document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
       document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
+      save('connect-theme', isDark ? 'dark' : 'light');
+    }
+    function toggleTheme() { isDark = !isDark; applyTheme(); }
+
+    function togglePw(inputId, btn) {
+      const inp = document.getElementById(inputId);
+      if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+      else { inp.type = 'password'; btn.textContent = '👁'; }
     }
 
-    /* AUTHENTICATION & INACTIVITY LOGOUT */
-    function logout() {
-      auth.signOut().then(() => {
-        window.location.href = 'landing.html';
-      });
-    }
-
-    let inactivityTimer;
-    function resetInactivityTimer() {
-      clearTimeout(inactivityTimer);
-      // Logout after 15 minutes of inactivity (900000 ms)
-      inactivityTimer = setTimeout(() => {
-        logout();
-      }, 900000);
-    }
-    // Listen for user activity to reset timer
-    window.addEventListener('mousemove', resetInactivityTimer);
-    window.addEventListener('keydown', resetInactivityTimer);
-    window.addEventListener('scroll', resetInactivityTimer);
-    window.addEventListener('click', resetInactivityTimer);
-
-    function applyUser() {
-      document.getElementById('userBar').style.display = 'flex';
-      document.getElementById('userLabel').textContent = 'Logged in as ' + currentUser;
-      document.getElementById('avatarEl').textContent = currentUser.slice(0, 2).toUpperCase();
-    }
-
-    /* TABS */
-    function switchTab(name) {
-      document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('active'));
-      const catEl = document.getElementById('cat-' + name);
-      if (catEl) catEl.classList.add('active');
-      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      document.getElementById('tab-' + name).classList.add('active');
-      if (name === 'mine') renderMyGroups();
-      if (name === 'stats') renderStats();
-      if (name === 'admin') renderAdmin();
-      if (name === 'browse') renderGroups();
-    }
-
-    /* SEARCH WITH LOADING ANIMATION */
-    let searchTimer = null;
-    function onSearchInput() {
-      const spinner = document.getElementById('searchSpinner');
-      const resultBar = document.getElementById('searchResultBar');
-      spinner.classList.add('visible');
-      resultBar.classList.add('hidden');
-      clearTimeout(searchTimer);
-      searchTimer = setTimeout(() => {
-        renderGroups();
-        spinner.classList.remove('visible');
-        const q = document.getElementById('searchInput').value.trim();
-        if (q) {
-          const count = document.querySelectorAll('#groupsList .card').length;
-          document.getElementById('searchResultText').textContent =
-            count > 0 ? `Found ${count} group${count !== 1 ? 's' : ''} for "${q}"` : `No groups matched "${q}"`;
-          resultBar.classList.remove('hidden');
-        }
-      }, 420);
-    }
-
-    /* FILTERS */
-    function renderFilters() {
-      const depts = ['All', ...new Set(groups.map(g => g.dept).filter(Boolean))];
-      document.getElementById('filterRow').innerHTML = depts.map(d =>
-        `<div class="chip ${d === activeFilter ? 'active' : ''}" onclick="setFilter('${d}')">${d}</div>`
-      ).join('');
-    }
-    function setFilter(d) { activeFilter = d; renderFilters(); renderGroups(); }
-
-    /* UI STATE HELPERS */
-    function startButtonLoad(btnId, isModal = false) {
-      const btn = isModal ? document.getElementById(btnId) : document.querySelector(`button[onclick*="'${btnId}'"], button[onclick*="${btnId}"]`);
-      if (!btn) return null;
-      const originalHtml = btn.innerHTML;
-      btn.classList.add('loading');
-      btn.innerHTML = `<span class="spinner"></span> Processing...`;
-      return { btn, originalHtml };
-    }
-    function endButtonLoad(state) {
-      if (!state) return;
-      state.btn.classList.remove('loading');
-      state.btn.innerHTML = state.originalHtml;
-    }
-
-    /* GROUPS LIST */
-    function renderGroups() {
-      const el = document.getElementById('groupsList');
-      if (initialLoad) {
-        el.innerHTML = `<div class="empty"><span class="spinner" style="border-top-color: var(--accent); border-color: var(--border-2); width: 30px; height: 30px;"></span><div class="empty-title" style="margin-top: 15px;">Loading groups...</div></div>`;
-        return;
-      }
-      const q = (document.getElementById('searchInput').value || '').toLowerCase();
-      const filtered = groups.filter(g => {
-        const ms = !q || g.name.toLowerCase().includes(q) || g.subject.toLowerCase().includes(q) || (g.dept || '').toLowerCase().includes(q);
-        const mf = activeFilter === 'All' || g.dept === activeFilter;
-        return ms && mf;
-      });
-      if (!filtered.length) {
-        el.innerHTML = `<div class="empty"><div class="empty-icon">🔭</div><div class="empty-title">No groups found</div><div class="empty-sub">Try a different search term<br>or create a new group.</div></div>`;
-        return;
-      }
-      el.innerHTML = filtered.map(g => buildCard(g)).join('');
-    }
-
-    function renderMyGroups() {
-      const el = document.getElementById('myGroupsList');
-      if (initialLoad) {
-        el.innerHTML = `<div class="empty"><span class="spinner" style="border-top-color: var(--accent); border-color: var(--border-2); width: 30px; height: 30px;"></span><div class="empty-title" style="margin-top: 15px;">Loading groups...</div></div>`;
-        return;
-      }
-      if (!currentUser) {
-        el.innerHTML = `<div class="empty"><div class="empty-icon">👤</div><div class="empty-title">Set your name first</div><div class="empty-sub">Enter your name at the top<br>to track your groups.</div></div>`;
-        return;
-      }
-      const mine = groups.filter(g => g.creator === currentUser || (g.members || []).includes(currentUser));
-      if (!mine.length) {
-        el.innerHTML = `<div class="empty"><div class="empty-icon">📚</div><div class="empty-title">No groups yet</div><div class="empty-sub">Browse to join a group<br>or create your own.</div></div>`;
-        return;
-      }
-      el.innerHTML = mine.map(g => buildCard(g)).join('');
-    }
-
-    function buildCard(g) {
-      const now = new Date();
-      const expiry = g.expiryDate ? new Date(g.expiryDate) : null;
-      const isExpired = expiry && now > expiry;
-      const fullExpiry = g.fullExpiry ? new Date(g.fullExpiry) : null;
-      const isFullExpired = fullExpiry && now > fullExpiry;
-
-      // Skip rendering expired groups completely - they should have been cleaned up
-      if (isExpired || isFullExpired) {
-        // Attempt immediate cleanup
-        db.ref('groups/' + g.dbId).remove().catch(e => console.error('Cleanup error:', e));
-        return '';
-      }
-
-      const mc = (g.members || []).length;
-      const isFull = mc >= g.max;
-      const isJoined = (g.members || []).includes(currentUser);
-      const isCreator = g.creator === currentUser;
-      const timeStr = g.time ? new Date(g.time).toLocaleString('en-PK', { dateStyle: 'medium', timeStyle: 'short' }) : 'TBD';
-
-      const spotsBadge = isFull
-        ? `<span class="badge badge-red">Full</span>`
-        : `<span class="badge badge-green">${g.max - mc} spot${g.max - mc !== 1 ? 's' : ''} open</span>`;
-      const deptBadge = g.dept ? `<span class="badge badge-blue">${g.dept}</span>` : '';
-      const roleBadge = isCreator ? `<span class="badge badge-amber">⭐ Owner</span>` : isJoined ? `<span class="badge badge-blue">Joined</span>` : '';
-
-      // Expiry badge with warning for closing soon
-      let expiryBadge = '';
-      if (expiry) {
-        const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
-        const expiryDateStr = expiry.toLocaleDateString('en-PK', { month: 'short', day: 'numeric' });
-
-        if (daysLeft <= 1) {
-          expiryBadge = `<span class="badge badge-red">🔴 Closes today</span>`;
-        } else if (daysLeft <= 3) {
-          expiryBadge = `<span class="badge badge-amber">⚠️ ${daysLeft}d left</span>`;
-        } else {
-          expiryBadge = `<span class="badge" style="background: var(--accent-bg); color: var(--accent-text);">📅 ${daysLeft}d left</span>`;
-        }
-      }
-
-      const membersHtml = mc ? `<div class="members-list">${(g.members || []).map(m =>
-        `<div class="m-chip ${m === currentUser ? 'you' : ''}">${m}${m === currentUser ? ' (you)' : ''}</div>`
-      ).join('')}</div>` : '';
-
-      let action = '';
-      if (isCreator) {
-        action = `<button class="btn" onclick="switchTab('admin')">📋 View requests</button><button class="btn" onclick="openExtendModal('${g.dbId}', '${g.name.replace(/'/g, "\\'")}')">⏳ Extend deadline</button><button class="btn btn-danger" onclick="confirmDelete('${g.dbId}')">🗑 Delete</button>`;
-      } else if (isJoined) {
-        action = `<button class="btn" onclick="leaveGroup('${g.dbId}')">Leave group</button>`;
-      } else if (!isFull) {
-        action = `<button class="btn btn-primary" onclick="openJoinRequest('${g.dbId}')">Request to join →</button>`;
-      } else {
-        action = `<button class="btn" disabled>Group full</button>`;
-      }
-
-      return `<div class="card">
-    <div class="card-head">
-      <div>
-        <div class="card-title">${g.name}</div>
-        <div class="card-sub">${g.subject} &bull; by ${g.creator}</div>
-      </div>
-      <div class="badge-row">${roleBadge}${spotsBadge}${deptBadge}${expiryBadge}</div>
-    </div>
-    ${g.desc ? `<div class="card-desc">${g.desc}</div>` : ''}
-    <div class="meta-row">
-      <div class="meta-item">📅 <span>${timeStr}</span></div>
-      <div class="meta-item">📍 <span>${g.location || 'Not specified'}</span></div>
-      <div class="meta-item">👥 <span>${mc}/${g.max} members</span></div>
-    </div>
-    ${membersHtml}
-    <div class="card-actions">${action}</div>
-  </div>`;
-    }
-
-    /* STATS */
-    function renderStats() {
-      const total = groups.length;
-      const totalM = groups.reduce((s, g) => s + (g.members || []).length, 0);
-      const open = groups.reduce((s, g) => s + Math.max(0, g.max - (g.members || []).length), 0);
-      document.getElementById('st-total').textContent = total;
-      document.getElementById('st-members').textContent = totalM;
-      document.getElementById('st-open').textContent = open;
-
-      const depts = {};
-      groups.forEach(g => { if (g.dept) depts[g.dept] = (depts[g.dept] || 0) + 1; });
-      const bd = document.getElementById('dept-breakdown');
-      if (!Object.keys(depts).length) { bd.innerHTML = ''; return; }
-      const max = Math.max(...Object.values(depts));
-      bd.innerHTML = `<div class="dept-card">
-    <div class="dept-title">Groups by department</div>
-    ${Object.entries(depts).sort((a, b) => b[1] - a[1]).map(([d, c]) =>
-        `<div class="dept-row">
-        <div class="dept-label">${d}</div>
-        <div class="dept-bar-wrap"><div class="dept-bar" style="width:${Math.round(c / max * 100)}%"></div></div>
-        <div class="dept-count">${c}</div>
-      </div>`
-      ).join('')}
-  </div>`;
-    }
-
-    /* DB OPERATIONS */
-    async function createGroup() {
-      if (!currentUser) { showFormError('Please set your name first (top right).'); return; }
-
-      const name = document.getElementById('f-name').value.trim();
-      const subject = document.getElementById('f-subject').value.trim();
-      const whatsapp = document.getElementById('f-whatsapp').value.trim();
-      const expiryDateStr = document.getElementById('f-expiry').value;
-      const err = document.getElementById('form-error');
-
-      if (!name) { showFormError('Group name is required.'); return; }
-      if (!subject) { showFormError('Subject / Course is required.'); return; }
-      if (!whatsapp) { showFormError('WhatsApp number is required.'); return; }
-      if (!expiryDateStr) { showFormError('Please set a join deadline.'); return; }
-
-      const expiryDate = new Date(expiryDateStr);
-      const now = new Date();
-      if (expiryDate < now) { showFormError('Expiry date must be in the future.'); return; }
-
-      err.style.display = 'none';
-
-      const g = {
-        name, subject, adminWhatsApp: whatsapp,
-        dept: document.getElementById('f-dept').value,
-        max: parseInt(document.getElementById('f-max').value) || 6,
-        time: document.getElementById('f-time').value,
-        location: document.getElementById('f-location').value.trim(),
-        desc: document.getElementById('f-desc').value.trim(),
-        creator: currentUser,
-        members: [currentUser],
-        expiryDate: expiryDateStr,
-        expiresAt: expiryDate.getTime(),
-        createdAt: new Date().toISOString()
-      };
-
-      const loadState = startButtonLoad('createGroup');
-      try {
-        const newRef = db.ref('groups').push();
-        await newRef.set(g);
-        clearForm();
-        switchTab('browse');
-        showToast('Group created! ✦');
-      } catch (error) {
-        showFormError('Failed to create group. Database error.');
-        console.error(error);
-      } finally {
-        endButtonLoad(loadState);
-      }
-    }
-
-    function showFormError(msg) {
-      const el = document.getElementById('form-error');
+    function showError(msg) {
+      const el = document.getElementById('errBox');
       el.textContent = msg;
-      el.style.display = 'block';
+      el.style.display = msg ? 'block' : 'none';
     }
 
-    function clearForm() {
-      ['f-name', 'f-subject', 'f-dept', 'f-time', 'f-location', 'f-desc', 'f-whatsapp', 'f-expiry'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-      document.getElementById('f-max').value = '6';
-      document.getElementById('form-error').style.display = 'none';
+    function friendlyError(e) {
+      if (!e) return 'Something went wrong.';
+      const code = e.code || '';
+      const message = e.message || '';
+      if (code === 'auth/invalid-email' || message.includes('invalid-email')) return 'Please enter a valid email.';
+      if (code === 'auth/invalid-credential' || message.includes('invalid-credential')) return 'Incorrect email or password.';
+      if (code === 'auth/too-many-requests') return 'Too many attempts. Please wait.';
+      return 'Sign in failed. Please try again.';
     }
 
-    function openJoinRequest(dbId) {
-      if (!currentUser) { showToast('Set your name first'); return; }
-      const g = groups.find(x => x.dbId === dbId);
-      if (!g) { showToast('Group not found'); return; }
-
-      // CHECK IF EXPIRED
-      const expiry = g.expiryDate ? new Date(g.expiryDate) : null;
-      if (expiry && new Date() > expiry) {
-        showToast('This group is no longer accepting requests');
-        db.ref('groups/' + dbId).remove().catch(e => console.error('Cleanup error:', e));
-        return;
-      }
-
-      // CHECK IF ALREADY REQUESTED
-      const groupRequests = requests[dbId] || {};
-      const alreadyRequested = Object.values(groupRequests).some(
-        r => r.requesterEmail === currentUser && (r.status === 'pending' || r.status === 'accepted')
-      );
-      if (alreadyRequested) {
-        showToast('You already sent a request to this group');
-        return;
-      }
-
-      // Navigate to the new join request page
-      window.location.href = `join-request.html?groupId=${dbId}`;
-    }
-
-    async function joinGroup(dbId) {
-      if (!currentUser) { showToast('Set your name first'); return; }
-      const g = groups.find(x => x.dbId === dbId); if (!g) return;
-      if ((g.members || []).includes(currentUser)) { showToast('Already in this group'); return; }
-      if ((g.members || []).length >= g.max) { showToast('This group is full'); return; }
-
-      const loadState = startButtonLoad(dbId);
-      try {
-        const newMembers = [...(g.members || []), currentUser];
-        const updateData = { members: newMembers };
-
-        // If group becomes full after this join, set auto-expiry (1 hour grace period)
-        if (newMembers.length >= g.max) {
-          const fullExpiry = new Date();
-          fullExpiry.setHours(fullExpiry.getHours() + 1); // 1 hour grace period
-          updateData.fullExpiry = fullExpiry.toISOString();
-          updateData.fullExpiryAt = fullExpiry.getTime();
-          showToast('Joined "' + g.name + '"! Group is now full and will close in 1 hour. 🎉');
-        } else {
-          showToast('Joined "' + g.name + '"! 🎉');
-        }
-
-        await db.ref('groups/' + dbId).update(updateData);
-      } catch (err) {
-        console.error(err);
-        showToast('Failed to join group.');
-      } finally {
-        endButtonLoad(loadState);
-      }
-    }
-
-    async function leaveGroup(dbId) {
-      const g = groups.find(x => x.dbId === dbId); if (!g) return;
-
-      const loadState = startButtonLoad(dbId);
-      try {
-        const newMembers = (g.members || []).filter(m => m !== currentUser);
-        await db.ref('groups/' + dbId).update({ members: newMembers });
-        showToast('Left "' + g.name + '"');
-      } catch (err) {
-        console.error(err);
-        showToast('Failed to leave group.');
-      } finally {
-        endButtonLoad(loadState);
-      }
-    }
-
-    /* DELETE WITH MODAL */
-    function confirmDelete(dbId) {
-      pendingDeleteId = dbId;
-      document.getElementById('modalOverlay').classList.add('open');
-      document.getElementById('modalConfirmBtn').onclick = () => { doDelete(); };
-    }
-    function closeModal() {
-      document.getElementById('modalOverlay').classList.remove('open');
-      pendingDeleteId = null;
-    }
-    async function doDelete() {
-      if (!pendingDeleteId) return;
-
-      const loadState = startButtonLoad('modalConfirmBtn', true);
-      try {
-        await db.ref('groups/' + pendingDeleteId).remove();
-        showToast('Group deleted');
-        closeModal();
-      } catch (err) {
-        console.error(err);
-        showToast('Failed to delete group.');
-      } finally {
-        endButtonLoad(loadState);
-      }
-    }
-    document.getElementById('modalOverlay').addEventListener('click', function (e) {
-      if (e.target === this) closeModal();
-    });
-
-    /* EXTEND DEADLINE */
-    let pendingExtendId = null;
-    function openExtendModal(dbId, groupName) {
-      pendingExtendId = dbId;
-      const g = groups.find(x => x.dbId === dbId);
-      document.getElementById('extendModalText').textContent = `Extend deadline for "${groupName}"`;
+    async function signIn() {
+      showError('');
+      const rawEmail = document.getElementById('email').value;
+      const email = rawEmail.toLowerCase().replace(/\s/g, "");
+      const password = document.getElementById('password').value;
       
-      // Set default date to today
-      const today = new Date();
-      const dateStr = today.toISOString().split('T')[0];
-      document.getElementById('extendNewDate').value = dateStr;
-      
-      document.getElementById('extendModalOverlay').classList.add('open');
-    }
-    function closeExtendModal() {
-      document.getElementById('extendModalOverlay').classList.remove('open');
-      pendingExtendId = null;
-    }
-    async function submitExtendDeadline() {
-      if (!pendingExtendId) return;
-      
-      const newDateStr = document.getElementById('extendNewDate').value;
-      if (!newDateStr) {
-        showToast('Please select a new date');
-        return;
-      }
-      
-      const newDate = new Date(newDateStr);
-      const now = new Date();
-      if (newDate <= now) {
-        showToast('New date must be in the future');
-        return;
-      }
-      
-      const btn = document.getElementById('extendConfirmBtn');
+      if (!email || !password) { showError('Please enter both email and password.'); return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('Please enter a valid email format.'); return; }
+
+      const btn = document.getElementById('signInBtn');
       btn.classList.add('loading');
-      btn.innerHTML = '<span class="spinner"></span> Extending...';
+      btn.innerHTML = '<span class="spinner"></span> Signing in...';
       btn.disabled = true;
-      
+
       try {
-        await db.ref('groups/' + pendingExtendId).update({ 
-          expiryDate: newDateStr,
-          warningShown: false
-        });
-        showToast('✓ Deadline extended!');
-        closeExtendModal();
-      } catch (err) {
-        console.error(err);
-        showToast('Failed to extend deadline');
+        await firebase.auth().signInWithEmailAndPassword(email, password);
+      } catch (e) {
+        showError(friendlyError(e));
         btn.classList.remove('loading');
-        btn.innerHTML = 'Extend';
+        btn.innerHTML = 'Sign In';
         btn.disabled = false;
       }
     }
-    document.getElementById('extendModalOverlay').addEventListener('click', function (e) {
-      if (e.target === this) closeExtendModal();
+
+    async function signInWithGoogle() {
+      showError('');
+      const btn = document.getElementById('googleBtn');
+      btn.classList.add('loading');
+      btn.disabled = true;
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        await firebase.auth().signInWithPopup(provider);
+      } catch (e) {
+        if (e.code === 'auth/popup-closed-by-user') { showError('Sign in cancelled.'); }
+        else { showError('Google sign in failed.'); }
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }
+    }
+
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) window.location.href = 'index.html';
     });
 
-    /* TOAST */
-    let toastTimer;
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
-    }
-
-    /* ADMIN DASHBOARD */
-    function renderAdmin() {
-      const el = document.getElementById('adminPanel');
-      if (initialLoad) {
-        el.innerHTML = `<div class="empty"><span class="spinner" style="border-top-color: var(--accent); border-color: var(--border-2); width: 30px; height: 30px;"></span><div class="empty-title" style="margin-top: 15px;">Loading...</div></div>`;
-        return;
-      }
-
-      const myGroups = groups.filter(g => g.creator === currentUser);
-      if (!myGroups.length) {
-        el.innerHTML = `<div class="empty"><div class="empty-icon">👤</div><div class="empty-title">No groups created</div><div class="empty-sub">Create a group first to manage requests.</div></div>`;
-        return;
-      }
-
-      // Sort groups: expiring soon first
-      const now = new Date();
-      myGroups.sort((a, b) => {
-        const expiryA = a.expiryDate ? new Date(a.expiryDate) : new Date(9999, 0, 1);
-        const expiryB = b.expiryDate ? new Date(b.expiryDate) : new Date(9999, 0, 1);
-        return expiryA - expiryB;
-      });
-
-      let html = '';
-      myGroups.forEach(g => {
-        const expiry = g.expiryDate ? new Date(g.expiryDate) : null;
-        const isExpired = expiry && now > expiry;
-        const daysUntilExpiry = expiry ? Math.ceil((expiry - now) / (1000 * 60 * 60 * 24)) : null;
-        
-        // Warning styling for expiring/expired groups
-        let warningStyle = '';
-        let warningBadge = '';
-        if (isExpired) {
-          warningStyle = 'border-left: 4px solid #DC2626; background: rgba(239, 68, 68, 0.05);';
-          warningBadge = `<span class="badge badge-red" style="margin-right: 8px;">⚠️ EXPIRED - Will delete in 24h</span>`;
-        } else if (daysUntilExpiry !== null && daysUntilExpiry <= 3) {
-          warningStyle = 'border-left: 4px solid #F59E0B; background: rgba(245, 158, 11, 0.05);';
-          warningBadge = `<span class="badge badge-amber" style="margin-right: 8px;">⏰ Expires in ${daysUntilExpiry} day${daysUntilExpiry !== 1 ? 's' : ''}</span>`;
-        }
-
-        const groupRequests = requests[g.dbId] || {};
-        const pending = Object.entries(groupRequests).filter(([k, r]) => r.status === 'pending').map(([k, r]) => ({ id: k, ...r }));
-        const accepted = Object.entries(groupRequests).filter(([k, r]) => r.status === 'accepted').map(([k, r]) => ({ id: k, ...r }));
-        const rejected = Object.entries(groupRequests).filter(([k, r]) => r.status === 'rejected').map(([k, r]) => ({ id: k, ...r }));
-
-        html += `<div class="form-card" style="margin-bottom: 2rem; ${warningStyle}">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <div class="form-title">${g.name}</div>
-        ${warningBadge}
-      </div>
-      <div style="margin-bottom: 1rem; padding: 10px 12px; background: var(--bg-secondary); border-radius: var(--radius-sm); font-size: 13px;">
-        <strong>Your WhatsApp:</strong> ${g.adminWhatsApp} | <strong>Pending:</strong> ${pending.length} | <strong>Accepted:</strong> ${accepted.length}
-        ${expiry ? `<br><strong>Expires:</strong> ${expiry.toLocaleDateString('en-PK')}` : '<br><strong>Expires:</strong> Not set'}
-      </div>
-      ${isExpired || (daysUntilExpiry !== null && daysUntilExpiry <= 3) ? `<div style="margin-bottom: 1rem;">
-        <button class="btn btn-primary" onclick="openExtendModal('${g.dbId}', '${g.name.replace(/'/g, "\\'")}')">⏳ Extend Deadline</button>
-      </div>` : ''}`;
-
-        if (!pending.length && !accepted.length && !rejected.length) {
-          html += `<div class="empty" style="padding: 2rem 1rem;"><div class="empty-icon">📬</div><div class="empty-title">No requests yet</div><div class="empty-sub">When people request to join,<br>they'll appear here.</div></div>`;
-        } else {
-          if (pending.length) {
-            html += `<div style="margin-bottom: 1.5rem;"><div style="font-weight: 600; color: var(--amber-text); margin-bottom: 0.75rem; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">⏳ Pending Requests (${pending.length})</div>`;
-            pending.forEach(r => {
-              html += `<div class="card" style="margin-bottom: 0.75rem;">
-            <div style="margin-bottom: 0.75rem;">
-              <div style="font-weight: 600; font-size: 14px; color: var(--text);">${r.requesterName}</div>
-              <div style="font-size: 12px; color: var(--text-3); margin-top: 2px;">${r.requesterEmail} | <strong>WhatsApp:</strong> ${r.requesterWhatsApp || 'N/A'}</div>
-            </div>
-            ${r.requesterMessage ? `<div style="font-size: 13px; color: var(--text-2); margin-bottom: 0.75rem; padding: 8px 10px; background: var(--bg-secondary); border-radius: 6px; border-left: 3px solid var(--accent);">"${r.requesterMessage}"</div>` : ''}
-            <div style="display: flex; gap: 8px;">
-              <button class="btn btn-primary" onclick="acceptRequest('${g.dbId}', '${r.id}', '${r.requesterName}')">✓ Accept</button>
-              <button class="btn btn-danger" onclick="rejectRequest('${g.dbId}', '${r.id}')">✗ Reject</button>
-            </div>
-          </div>`;
-            });
-            html += `</div>`;
-          }
-
-          if (accepted.length) {
-            html += `<div style="margin-bottom: 1.5rem;"><div style="font-weight: 600; color: var(--green-text); margin-bottom: 0.75rem; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">✓ Accepted (${accepted.length})</div>`;
-            accepted.forEach(r => {
-              html += `<div class="card" style="margin-bottom: 0.75rem; border-left: 3px solid var(--accent);">
-            <div style="display: flex; justify-content: space-between; align-items: start;">
-              <div>
-                <div style="font-weight: 600; font-size: 14px; color: var(--text);">${r.requesterName}</div>
-                <div style="font-size: 12px; color: var(--text-3); margin-top: 2px;">${r.requesterEmail} | <strong>WhatsApp:</strong> ${r.requesterWhatsApp || 'N/A'}</div>
-              </div>
-              <span class="badge badge-green">Accepted</span>
-            </div>
-          </div>`;
-            });
-            html += `</div>`;
-          }
-
-          if (rejected.length) {
-            html += `<div><div style="font-weight: 600; color: var(--red-text); margin-bottom: 0.75rem; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">✗ Rejected (${rejected.length})</div>`;
-            rejected.forEach(r => {
-              html += `<div class="card" style="margin-bottom: 0.75rem; opacity: 0.6;">
-            <div style="display: flex; justify-content: space-between; align-items: start;">
-              <div>
-                <div style="font-weight: 600; font-size: 14px; color: var(--text);">${r.requesterName}</div>
-                <div style="font-size: 12px; color: var(--text-3); margin-top: 2px;">${r.requesterEmail}</div>
-              </div>
-              <span class="badge badge-red">Rejected</span>
-            </div>
-          </div>`;
-            });
-            html += `</div>`;
-          }
-        }
-
-        html += `</div>`;
-      });
-
-      el.innerHTML = html;
-    }
-
-    async function acceptRequest(groupId, requestId, requesterName) {
-      const g = groups.find(x => x.dbId === groupId);
-      if (!g) { showToast('Group not found'); return; }
-      if ((g.members || []).includes(requesterName)) {
-        showToast('User already in group');
-        return;
-      }
-      if ((g.members || []).length >= g.max) {
-        showToast('Group is now full');
-        return;
-      }
-
-      try {
-        const newMembers = [...(g.members || []), requesterName];
-        await db.ref(`groups/${groupId}`).update({ members: newMembers });
-        await db.ref(`requests/${groupId}/${requestId}`).update({ status: 'accepted' });
-        showToast('✓ Request accepted! Member added to group');
-      } catch (err) {
-        console.error(err);
-        showToast('Failed to accept request');
-      }
-    }
-
-    async function rejectRequest(groupId, requestId) {
-      try {
-        await db.ref(`requests/${groupId}/${requestId}`).update({ status: 'rejected' });
-        showToast('✗ Request rejected');
-      } catch (err) {
-        console.error(err);
-        showToast('Failed to reject request');
-      }
-    }
-
-
-
-    init();
+    isDark = load('connect-theme', 'light') === 'dark';
+    applyTheme();
   </script>
 </body>
-
 </html>
