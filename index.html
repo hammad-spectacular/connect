@@ -1545,6 +1545,23 @@
     </div>
   </div>
 
+  <!-- INVITE MEMBERS MODAL -->
+  <div class="modal-overlay" id="inviteModalOverlay">
+    <div class="modal">
+      <div class="modal-title">Invite Members</div>
+      <div class="modal-text" id="inviteModalText">Add members to your group</div>
+      <div style="margin-bottom: 1.25rem;">
+        <label class="form-label" style="display: block; margin-bottom: 6px;">Enter email addresses (comma-separated)</label>
+        <textarea class="form-input" id="inviteEmails" style="min-height: 80px; resize: vertical;" placeholder="user1@example.com, user2@example.com"></textarea>
+        <small style="color: var(--text-3); display: block; margin-top: 6px;">Separate multiple emails with commas</small>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="closeInviteModal()">Cancel</button>
+        <button class="btn btn-primary" id="inviteConfirmBtn" onclick="submitInvite()">Send Invites</button>
+      </div>
+    </div>
+  </div>
+
   <!-- FIREBASE SDKS -->
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-database-compat.js"></script>
@@ -1890,9 +1907,9 @@
 
       let action = '';
       if (isCreator) {
-        action = `<button class="btn" onclick="switchTab('admin')">📋 View requests</button><button class="btn" onclick="openExtendModal('${g.dbId}', '${g.name.replace(/'/g, "\\'")}')">⏳ Extend deadline</button><button class="btn btn-danger" onclick="confirmDelete('${g.dbId}')">🗑 Delete</button>`;
+        action = `<button class="btn btn-primary" onclick="window.location.href='chat.html?groupId=${g.dbId}'">💬 Open Chat</button><button class="btn" onclick="openInviteModal('${g.dbId}', '${g.name.replace(/'/g, "\\'")}')">👥 Invite Members</button><button class="btn" onclick="switchTab('admin')">📋 View requests</button><button class="btn" onclick="openExtendModal('${g.dbId}', '${g.name.replace(/'/g, "\\'")}')">⏳ Extend deadline</button><button class="btn btn-danger" onclick="confirmDelete('${g.dbId}')">🗑 Delete</button>`;
       } else if (isJoined) {
-        action = `<button class="btn" onclick="leaveGroup('${g.dbId}')">Leave group</button>`;
+        action = `<button class="btn btn-primary" onclick="window.location.href='chat.html?groupId=${g.dbId}'">💬 Open Chat</button><button class="btn" onclick="leaveGroup('${g.dbId}')">Leave group</button>`;
       } else if (!isFull) {
         action = `<button class="btn btn-primary" onclick="openJoinRequest('${g.dbId}')">Request to join →</button>`;
       } else {
@@ -1965,26 +1982,47 @@
 
       err.style.display = 'none';
 
-      const g = {
-        name, subject, adminWhatsApp: whatsapp,
-        dept: document.getElementById('f-dept').value,
-        max: parseInt(document.getElementById('f-max').value) || 6,
-        time: document.getElementById('f-time').value,
-        location: document.getElementById('f-location').value.trim(),
-        desc: document.getElementById('f-desc').value.trim(),
-        creator: currentUser,
-        members: [currentUser],
-        expiryDate: expiryDateStr,
-        expiresAt: expiryDate.getTime(),
-        createdAt: new Date().toISOString()
-      };
-
       const loadState = startButtonLoad('createGroup');
       try {
+        // Get user ID from Firebase auth
+        const userId = auth.currentUser?.uid;
+        const userEmail = auth.currentUser?.email || currentUser;
+        
+        // Create group in new structure compatible with chat.html
         const newRef = db.ref('groups').push();
+        const groupId = newRef.key;
+        
+        // Group data (compatible with both old UI and new chat system)
+        const g = {
+          name, subject, adminWhatsApp: whatsapp,
+          dept: document.getElementById('f-dept').value,
+          max: parseInt(document.getElementById('f-max').value) || 6,
+          time: document.getElementById('f-time').value,
+          location: document.getElementById('f-location').value.trim(),
+          desc: document.getElementById('f-desc').value.trim(),
+          creator: currentUser,
+          createdBy: userId, // For chat.html compatibility
+          groupName: name,   // For chat.html compatibility
+          description: document.getElementById('f-desc').value.trim(),
+          createdAt: Date.now(),
+          members: [currentUser],
+          expiryDate: expiryDateStr,
+          expiresAt: expiryDate.getTime()
+        };
+        
+        // Save group
         await newRef.set(g);
+        
+        // Add creator as member in new structure
+        const memberData = {
+          displayName: currentUser,
+          joinedAt: Date.now(),
+          status: 'active'
+        };
+        await db.ref(`groups/${groupId}/members/${userId}`).set(memberData);
+        
         clearForm();
-        switchTab('browse');
+        switchTab('mine');
         showToast('Group created! ✦');
       } catch (error) {
         showFormError('Failed to create group. Database error.');
@@ -2167,6 +2205,68 @@
       if (e.target === this) closeExtendModal();
     });
 
+    /* INVITE MEMBERS */
+    let pendingInviteId = null;
+    function openInviteModal(groupId, groupName) {
+      pendingInviteId = groupId;
+      document.getElementById('inviteModalText').textContent = `Add members to "${groupName}"`;
+      document.getElementById('inviteEmails').value = '';
+      document.getElementById('inviteModalOverlay').classList.add('open');
+    }
+    function closeInviteModal() {
+      document.getElementById('inviteModalOverlay').classList.remove('open');
+      pendingInviteId = null;
+    }
+    async function submitInvite() {
+      if (!pendingInviteId) return;
+      
+      const emailsText = document.getElementById('inviteEmails').value.trim();
+      if (!emailsText) {
+        showToast('Please enter at least one email');
+        return;
+      }
+      
+      const emails = emailsText.split(',').map(e => e.trim()).filter(e => e);
+      if (!emails.length) {
+        showToast('Please enter valid emails');
+        return;
+      }
+      
+      const btn = document.getElementById('inviteConfirmBtn');
+      btn.classList.add('loading');
+      btn.innerHTML = '<span class="spinner"></span> Inviting...';
+      btn.disabled = true;
+      
+      try {
+        const g = groups.find(x => x.dbId === pendingInviteId);
+        if (!g) throw new Error('Group not found');
+        
+        // Add invited users as members with pending status
+        const userId = auth.currentUser?.uid;
+        for (const email of emails) {
+          const memberData = {
+            displayName: email.split('@')[0],
+            joinedAt: Date.now(),
+            status: 'active' // They can join immediately
+          };
+          // For now, auto-add them. In production, you might want a pending status
+          await db.ref(`groups/${pendingInviteId}/members/${email}`).set(memberData);
+        }
+        
+        showToast(`✓ Invited ${emails.length} member${emails.length !== 1 ? 's' : ''}!`);
+        closeInviteModal();
+      } catch (err) {
+        console.error(err);
+        showToast('Failed to send invites');
+        btn.classList.remove('loading');
+        btn.innerHTML = 'Send Invites';
+        btn.disabled = false;
+      }
+    }
+    document.getElementById('inviteModalOverlay').addEventListener('click', function (e) {
+      if (e.target === this) closeInviteModal();
+    });
+
     /* TOAST */
     let toastTimer;
     function showToast(msg) {
@@ -2309,6 +2409,16 @@
       try {
         const newMembers = [...(g.members || []), requesterName];
         await db.ref(`groups/${groupId}`).update({ members: newMembers });
+        
+        // Also add to new Firebase structure for chat compatibility
+        const memberData = {
+          displayName: requesterName,
+          joinedAt: Date.now(),
+          status: 'active'
+        };
+        // Use requester name as a simple ID (in production, use proper user IDs)
+        await db.ref(`groups/${groupId}/members/${requesterName}`).set(memberData);
+        
         await db.ref(`requests/${groupId}/${requestId}`).update({ status: 'accepted' });
         showToast('✓ Request accepted! Member added to group');
       } catch (err) {
