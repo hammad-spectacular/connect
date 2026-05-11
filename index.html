@@ -1586,6 +1586,15 @@
     let currentUser = '', groups = [], requests = {}, activeFilter = 'All', isDark = false, pendingDeleteId = null, pendingGroupId = null;
     let initialLoad = true;
 
+    function getActiveMembers(g) {
+      const members = g.members || {};
+      return Object.values(members)
+        .filter(m => typeof m === 'object' && m && m.status !== 'kicked')
+        .map(m => m.displayName);
+    }
+    function isActiveMember(g, name) { return getActiveMembers(g).includes(name); }
+    function activeMemberCount(g) { return getActiveMembers(g).length; }
+
     // LOCAL STORAGE (For User & Theme)
     function save(key, val) { try { localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val)); } catch (e) { } }
     function load(key, fallback) { try { const v = localStorage.getItem(key); return v !== null ? v : fallback; } catch (e) { return fallback; } }
@@ -1852,7 +1861,7 @@
         el.innerHTML = `<div class="empty"><div class="empty-icon">👤</div><div class="empty-title">Set your name first</div><div class="empty-sub">Enter your name at the top<br>to track your groups.</div></div>`;
         return;
       }
-      const mine = groups.filter(g => g.creator === currentUser || (g.members || []).includes(currentUser));
+      const mine = groups.filter(g => g.creator === currentUser || isActiveMember(g, currentUser));
       if (!mine.length) {
         el.innerHTML = `<div class="empty"><div class="empty-icon">📚</div><div class="empty-title">No groups yet</div><div class="empty-sub">Browse to join a group<br>or create your own.</div></div>`;
         return;
@@ -1874,9 +1883,9 @@
         return '';
       }
 
-      const mc = (g.members || []).length;
+      const mc = activeMemberCount(g);
       const isFull = mc >= g.max;
-      const isJoined = (g.members || []).includes(currentUser);
+      const isJoined = isActiveMember(g, currentUser);
       const isCreator = g.creator === currentUser;
       const timeStr = g.time ? new Date(g.time).toLocaleString('en-PK', { dateStyle: 'medium', timeStyle: 'short' }) : 'TBD';
 
@@ -1901,7 +1910,8 @@
         }
       }
 
-      const membersHtml = mc ? `<div class="members-list">${(g.members || []).map(m =>
+      const memberNames = getActiveMembers(g);
+      const membersHtml = mc ? `<div class="members-list">${memberNames.map(m =>
         `<div class="m-chip ${m === currentUser ? 'you' : ''}">${m}${m === currentUser ? ' (you)' : ''}</div>`
       ).join('')}</div>` : '';
 
@@ -1938,7 +1948,7 @@
     /* STATS */
     function renderStats() {
       const total = groups.length;
-      const totalM = groups.reduce((s, g) => s + (g.members || []).length, 0);
+      const totalM = groups.reduce((s, g) => s + activeMemberCount(g), 0);
       const open = groups.reduce((s, g) => s + Math.max(0, g.max - (g.members || []).length), 0);
       document.getElementById('st-total').textContent = total;
       document.getElementById('st-members').textContent = totalM;
@@ -2005,7 +2015,6 @@
           groupName: name,   // For chat.html compatibility
           description: document.getElementById('f-desc').value.trim(),
           createdAt: Date.now(),
-          members: [currentUser],
           expiryDate: expiryDateStr,
           expiresAt: expiryDate.getTime()
         };
@@ -2013,13 +2022,12 @@
         // Save group
         await newRef.set(g);
         
-        // Add creator as member in new structure
-        const memberData = {
+        // Add creator as member — stored by UID so chat.html can look it up
+        await db.ref(`groups/${groupId}/members/${userId}`).set({
           displayName: currentUser,
           joinedAt: Date.now(),
           status: 'active'
-        };
-        await db.ref(`groups/${groupId}/members/${userId}`).set(memberData);
+        });
         
         clearForm();
         switchTab('mine');
@@ -2074,26 +2082,34 @@
     async function joinGroup(dbId) {
       if (!currentUser) { showToast('Set your name first'); return; }
       const g = groups.find(x => x.dbId === dbId); if (!g) return;
-      if ((g.members || []).includes(currentUser)) { showToast('Already in this group'); return; }
-      if ((g.members || []).length >= g.max) { showToast('This group is full'); return; }
+      if (isActiveMember(g, currentUser)) { showToast('Already in this group'); return; }
+      if (activeMemberCount(g) >= g.max) { showToast('This group is full'); return; }
+
+      const uid = auth.currentUser?.uid;
+      if (!uid) { showToast('Authentication error'); return; }
 
       const loadState = startButtonLoad(dbId);
       try {
-        const newMembers = [...(g.members || []), currentUser];
-        const updateData = { members: newMembers };
+        const newCount = activeMemberCount(g) + 1;
+
+        await db.ref(`groups/${dbId}/members/${uid}`).set({
+          displayName: currentUser,
+          joinedAt: Date.now(),
+          status: 'active'
+        });
 
         // If group becomes full after this join, set auto-expiry (1 hour grace period)
-        if (newMembers.length >= g.max) {
+        if (newCount >= g.max) {
           const fullExpiry = new Date();
-          fullExpiry.setHours(fullExpiry.getHours() + 1); // 1 hour grace period
-          updateData.fullExpiry = fullExpiry.toISOString();
-          updateData.fullExpiryAt = fullExpiry.getTime();
+          fullExpiry.setHours(fullExpiry.getHours() + 1);
+          await db.ref('groups/' + dbId).update({
+            fullExpiry: fullExpiry.toISOString(),
+            fullExpiryAt: fullExpiry.getTime()
+          });
           showToast('Joined "' + g.name + '"! Group is now full and will close in 1 hour. 🎉');
         } else {
           showToast('Joined "' + g.name + '"! 🎉');
         }
-
-        await db.ref('groups/' + dbId).update(updateData);
       } catch (err) {
         console.error(err);
         showToast('Failed to join group.');
@@ -2104,11 +2120,12 @@
 
     async function leaveGroup(dbId) {
       const g = groups.find(x => x.dbId === dbId); if (!g) return;
+      const uid = auth.currentUser?.uid;
+      if (!uid) { showToast('Authentication error'); return; }
 
       const loadState = startButtonLoad(dbId);
       try {
-        const newMembers = (g.members || []).filter(m => m !== currentUser);
-        await db.ref('groups/' + dbId).update({ members: newMembers });
+        await db.ref('groups/' + dbId + '/members/' + uid).remove();
         showToast('Left "' + g.name + '"');
       } catch (err) {
         console.error(err);
@@ -2397,28 +2414,23 @@
     async function acceptRequest(groupId, requestId, requesterName) {
       const g = groups.find(x => x.dbId === groupId);
       if (!g) { showToast('Group not found'); return; }
-      if ((g.members || []).includes(requesterName)) {
+      if (isActiveMember(g, requesterName)) {
         showToast('User already in group');
         return;
       }
-      if ((g.members || []).length >= g.max) {
+      if (activeMemberCount(g) >= g.max) {
         showToast('Group is now full');
         return;
       }
 
       try {
-        const newMembers = [...(g.members || []), requesterName];
-        await db.ref(`groups/${groupId}`).update({ members: newMembers });
-        
-        // Also add to new Firebase structure for chat compatibility
-        const memberData = {
+        // Add member by UID — chat.html looks up by auth.currentUser.uid
+        const requesterUid = r.requesterUid || requesterName;
+        await db.ref(`groups/${groupId}/members/${requesterUid}`).set({
           displayName: requesterName,
           joinedAt: Date.now(),
           status: 'active'
-        };
-        // Use requester UID so chat.html can look up by auth.currentUser.uid
-        const requesterUid = r.requesterUid || requesterName;
-        await db.ref(`groups/${groupId}/members/${requesterUid}`).set(memberData);
+        });
         
         await db.ref(`requests/${groupId}/${requestId}`).update({ status: 'accepted' });
         showToast('✓ Request accepted! Member added to group');
