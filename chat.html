@@ -902,6 +902,9 @@
           }
 
           const group = groupSnapshot.val();
+
+          // Set room title from group data
+          document.getElementById('roomTitle').textContent = group.name || group.groupName || 'Chat Room';
           
           // Check if current user is a member of this group
           db.ref(`groups/${currentGroupId}/members/${user.uid}`).once('value', (memberSnapshot) => {
