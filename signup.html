@@ -310,7 +310,8 @@
     async function signUp() {
       showError('');
       const name = document.getElementById('displayName').value.trim();
-      const email = document.getElementById('email').value.trim().toLowerCase();
+      const rawEmail = document.getElementById('email').value;
+      const email = rawEmail.toLowerCase().replace(/\s/g, "");
       const password = document.getElementById('password').value;
       
       if (!email || !password) { showError('Please enter email and password.'); return; }
