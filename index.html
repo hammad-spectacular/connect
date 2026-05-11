@@ -2416,8 +2416,9 @@
           joinedAt: Date.now(),
           status: 'active'
         };
-        // Use requester name as a simple ID (in production, use proper user IDs)
-        await db.ref(`groups/${groupId}/members/${requesterName}`).set(memberData);
+        // Use requester UID so chat.html can look up by auth.currentUser.uid
+        const requesterUid = r.requesterUid || requesterName;
+        await db.ref(`groups/${groupId}/members/${requesterUid}`).set(memberData);
         
         await db.ref(`requests/${groupId}/${requestId}`).update({ status: 'accepted' });
         showToast('✓ Request accepted! Member added to group');
