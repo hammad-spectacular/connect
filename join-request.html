@@ -335,6 +335,7 @@
           requesterWhatsApp: whatsapp,
           requesterMessage: msg,
           requesterEmail: currentUserEmail,
+          requesterUid: auth.currentUser.uid,
           status: 'pending',
           timestamp: new Date().toISOString()
         };
