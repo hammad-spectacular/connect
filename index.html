@@ -1593,6 +1593,10 @@
         .map(m => m.displayName);
     }
     function isActiveMember(g, name) { return getActiveMembers(g).includes(name); }
+    function isActiveMemberByUid(g, uid) {
+      const member = g.members?.[uid];
+      return member && typeof member === 'object' && member.status !== 'kicked';
+    }
     function activeMemberCount(g) { return getActiveMembers(g).length; }
 
     // LOCAL STORAGE (For User & Theme)
@@ -1861,7 +1865,7 @@
         el.innerHTML = `<div class="empty"><div class="empty-icon">👤</div><div class="empty-title">Set your name first</div><div class="empty-sub">Enter your name at the top<br>to track your groups.</div></div>`;
         return;
       }
-      const mine = groups.filter(g => g.creator === currentUser || isActiveMember(g, currentUser));
+      const mine = groups.filter(g => g.creator === currentUser || (auth.currentUser?.uid && isActiveMemberByUid(g, auth.currentUser.uid)));
       if (!mine.length) {
         el.innerHTML = `<div class="empty"><div class="empty-icon">📚</div><div class="empty-title">No groups yet</div><div class="empty-sub">Browse to join a group<br>or create your own.</div></div>`;
         return;
@@ -1885,7 +1889,7 @@
 
       const mc = activeMemberCount(g);
       const isFull = mc >= g.max;
-      const isJoined = isActiveMember(g, currentUser);
+      const isJoined = auth.currentUser?.uid ? isActiveMemberByUid(g, auth.currentUser.uid) : false;
       const isCreator = g.creator === currentUser;
       const timeStr = g.time ? new Date(g.time).toLocaleString('en-PK', { dateStyle: 'medium', timeStyle: 'short' }) : 'TBD';
 
@@ -2082,7 +2086,7 @@
     async function joinGroup(dbId) {
       if (!currentUser) { showToast('Set your name first'); return; }
       const g = groups.find(x => x.dbId === dbId); if (!g) return;
-      if (isActiveMember(g, currentUser)) { showToast('Already in this group'); return; }
+      if (auth.currentUser?.uid && isActiveMemberByUid(g, auth.currentUser.uid)) { showToast('Already in this group'); return; }
       if (activeMemberCount(g) >= g.max) { showToast('This group is full'); return; }
 
       const uid = auth.currentUser?.uid;
@@ -2425,7 +2429,8 @@
 
       try {
         // Add member by UID — chat.html looks up by auth.currentUser.uid
-        const requesterUid = r.requesterUid || requesterName;
+        const requestData = requests[groupId]?.[requestId];
+        const requesterUid = requestData?.requesterUid || requesterName;
         await db.ref(`groups/${groupId}/members/${requesterUid}`).set({
           displayName: requesterName,
           joinedAt: Date.now(),
