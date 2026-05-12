@@ -2127,9 +2127,23 @@
       const uid = auth.currentUser?.uid;
       if (!uid) { showToast('Authentication error'); return; }
 
+      if (!confirm('Are you sure you want to leave "' + g.name + '"? You will need to request again to re-join.')) return;
+
       const loadState = startButtonLoad(dbId);
       try {
-        await db.ref('groups/' + dbId + '/members/' + uid).remove();
+        // 1. Remove from members
+        const memberPromise = db.ref('groups/' + dbId + '/members/' + uid).remove();
+        
+        // 2. Cleanup join requests
+        const requestsRef = db.ref('requests/' + dbId);
+        const requestCleanupPromise = requestsRef.orderByChild('requesterUid').equalTo(uid).once('value')
+          .then(snapshot => {
+            const updates = {};
+            snapshot.forEach(child => { updates[child.key] = null; });
+            return requestsRef.update(updates);
+          });
+
+        await Promise.all([memberPromise, requestCleanupPromise]);
         showToast('Left "' + g.name + '"');
       } catch (err) {
         console.error(err);
