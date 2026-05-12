@@ -2134,12 +2134,18 @@
         // 1. Remove from members
         const memberPromise = db.ref('groups/' + dbId + '/members/' + uid).remove();
         
-        // 2. Cleanup join requests
+        // 2. Cleanup join requests (robustly fetch all for group and filter)
         const requestsRef = db.ref('requests/' + dbId);
-        const requestCleanupPromise = requestsRef.orderByChild('requesterUid').equalTo(uid).once('value')
+        const email = auth.currentUser?.email;
+        const requestCleanupPromise = requestsRef.once('value')
           .then(snapshot => {
             const updates = {};
-            snapshot.forEach(child => { updates[child.key] = null; });
+            snapshot.forEach(child => {
+              const req = child.val();
+              if (req.requesterUid === uid || (email && req.requesterEmail === email)) {
+                updates[child.key] = null;
+              }
+            });
             return requestsRef.update(updates);
           });
 
