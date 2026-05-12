@@ -121,17 +121,7 @@
     }
     .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
     
-    .pw-wrap { position: relative; }
-    .pw-wrap .input { padding-right: 44px; }
-    .pw-toggle {
-      position: absolute;
-      right: 12px; top: 50%;
-      transform: translateY(-50%);
-      background: none; border: none; cursor: pointer;
-      color: var(--text-3); font-size: 18px; padding: 4px;
-      transition: color var(--transition);
-    }
-    .pw-toggle:hover { color: var(--text-2); }
+
 
     .forgot-link {
       display: block;
@@ -238,10 +228,7 @@
       
       <div>
         <label class="label">Password</label>
-        <div class="pw-wrap">
-          <input class="input" id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
-          <button class="pw-toggle" onclick="togglePw('password', this)" type="button">👁</button>
-        </div>
+        <input class="input" id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
         <a href="forgotpassword.html" class="forgot-link">Forgot password?</a>
       </div>
       
@@ -289,11 +276,6 @@
     }
     function toggleTheme() { isDark = !isDark; applyTheme(); }
 
-    function togglePw(inputId, btn) {
-      const inp = document.getElementById(inputId);
-      if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
-      else { inp.type = 'password'; btn.textContent = '👁'; }
-    }
 
     function showError(msg) {
       const el = document.getElementById('errBox');
