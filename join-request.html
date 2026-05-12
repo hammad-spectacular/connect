@@ -212,7 +212,13 @@
       
       <div>
         <label class="label">WhatsApp Number *</label>
-        <input class="input" id="jr-whatsapp" type="tel" placeholder="+92 300 1234567" />
+        <div style="display: flex; gap: 8px;">
+          <select class="input" id="jr-country-code" style="width: 100px; padding: 11px 8px; flex-shrink: 0;" onchange="validatePhone()">
+            <option value="+92">🇵🇰 +92</option>
+            <option value="+1">🇺🇸 +1</option>
+          </select>
+          <input class="input" id="jr-whatsapp" type="tel" placeholder="03001234567" oninput="validatePhone()" />
+        </div>
       </div>
       
       <div>
@@ -274,6 +280,20 @@
       el.style.display = msg ? 'block' : 'none';
     }
 
+    function validatePhone() {
+      const input = document.getElementById('jr-whatsapp');
+      const code = document.getElementById('jr-country-code').value;
+      // Remove any non-numeric characters
+      input.value = input.value.replace(/[^0-9]/g, '');
+      
+      // Enforce limit based on country (11 digits for Pakistan)
+      if (code === '+92') {
+        if (input.value.length > 11) {
+          input.value = input.value.slice(0, 11);
+        }
+      }
+    }
+
     // Initialize
     auth.onAuthStateChanged((user) => {
       if (user) {
@@ -302,7 +322,9 @@
     async function submitJoinRequest() {
       showError('');
       const name = document.getElementById('jr-name').value.trim();
-      const whatsapp = document.getElementById('jr-whatsapp').value.trim();
+      const whatsappNum = document.getElementById('jr-whatsapp').value.trim();
+      const code = document.getElementById('jr-country-code').value;
+      const whatsapp = whatsappNum ? `${code} ${whatsappNum}` : '';
       const msg = document.getElementById('jr-msg').value.trim();
       
       if (!name) { showError('Please enter your name.'); return; }
