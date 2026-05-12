@@ -77,7 +77,9 @@
       font-family: var(--font-body);
       background: var(--bg);
       color: var(--text);
-      min-height: 100vh;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
       transition: background var(--transition), color var(--transition);
@@ -104,6 +106,7 @@
       margin: 0 auto;
       width: 100%;
       padding: 1.25rem;
+      min-height: 0;
     }
 
     /* Header */
@@ -484,11 +487,13 @@
     /* Responsive */
     @media (max-width: 900px) {
       .main-content {
-        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
       }
 
       .sidebar {
         order: -1;
+        flex-shrink: 0;
       }
 
       .members-panel {
@@ -894,13 +899,17 @@
         // 1. Remove from members
         const memberPromise = db.ref(`groups/${currentGroupId}/members/${uid}`).remove();
         
-        // 2. Cleanup join requests
+        // 2. Cleanup join requests (robustly fetch all for group and filter)
         const requestsRef = db.ref(`requests/${currentGroupId}`);
-        const requestCleanupPromise = requestsRef.orderByChild('requesterUid').equalTo(uid).once('value')
+        const requestCleanupPromise = requestsRef.once('value')
           .then(snapshot => {
             const updates = {};
+            const email = currentUser.email;
             snapshot.forEach(child => {
-              updates[child.key] = null;
+              const req = child.val();
+              if (req.requesterUid === uid || (email && req.requesterEmail === email)) {
+                updates[child.key] = null;
+              }
             });
             return requestsRef.update(updates);
           });
