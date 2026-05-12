@@ -1453,8 +1453,8 @@
             <input class="form-input" id="f-max" type="number" min="2" max="20" value="6" />
           </div>
           <div class="form-group">
-            <label class="form-label">Session date & time</label>
-            <input class="form-input" id="f-time" type="datetime-local" />
+            <label class="form-label">Session date</label>
+            <input class="form-input" id="f-time" type="date" />
           </div>
           <div class="form-group">
             <label class="form-label">Join deadline (expiry date) *</label>
@@ -1466,7 +1466,7 @@
           </div>
           <div class="form-group">
             <label class="form-label">Your WhatsApp Number *</label>
-            <input class="form-input" id="f-whatsapp" type="tel" placeholder="+92 300 1234567" />
+            <input class="form-input" id="f-whatsapp" type="tel" placeholder="03001234567" oninput="this.value=this.value.replace(/[^0-9+]/g,'')" />
           </div>
           <div class="form-group form-full">
             <label class="form-label">Description</label>
@@ -1641,7 +1641,7 @@
 
             // Check date-based expiry
             if (g.expiryDate) {
-              const expiryDate = new Date(g.expiryDate);
+              const expiryDate = new Date(g.expiryDate + 'T23:59:59');
               const isExpired = now > expiryDate;
               const expiredTime = now - expiryDate;
 
@@ -1875,7 +1875,7 @@
 
     function buildCard(g) {
       const now = new Date();
-      const expiry = g.expiryDate ? new Date(g.expiryDate) : null;
+      const expiry = g.expiryDate ? new Date(g.expiryDate + 'T23:59:59') : null;
       const isExpired = expiry && now > expiry;
       const fullExpiry = g.fullExpiry ? new Date(g.fullExpiry) : null;
       const isFullExpired = fullExpiry && now > fullExpiry;
@@ -1986,11 +1986,13 @@
       const err = document.getElementById('form-error');
 
       if (!name) { showFormError('Group name is required.'); return; }
+      if (name.length < 3) { showFormError('Group name must be at least 3 characters.'); return; }
       if (!subject) { showFormError('Subject / Course is required.'); return; }
+      if (subject.length < 3) { showFormError('Subject / Course must be at least 3 characters.'); return; }
       if (!whatsapp) { showFormError('WhatsApp number is required.'); return; }
       if (!expiryDateStr) { showFormError('Please set a join deadline.'); return; }
 
-      const expiryDate = new Date(expiryDateStr);
+      const expiryDate = new Date(expiryDateStr + 'T23:59:59');
       const now = new Date();
       if (expiryDate < now) { showFormError('Expiry date must be in the future.'); return; }
 
@@ -2332,21 +2334,19 @@
         return;
       }
 
-      // Sort groups: expiring soon first
       const now = new Date();
       myGroups.sort((a, b) => {
-        const expiryA = a.expiryDate ? new Date(a.expiryDate) : new Date(9999, 0, 1);
-        const expiryB = b.expiryDate ? new Date(b.expiryDate) : new Date(9999, 0, 1);
+        const expiryA = a.expiryDate ? new Date(a.expiryDate + 'T23:59:59') : new Date(9999, 0, 1);
+        const expiryB = b.expiryDate ? new Date(b.expiryDate + 'T23:59:59') : new Date(9999, 0, 1);
         return expiryA - expiryB;
       });
 
       let html = '';
       myGroups.forEach(g => {
-        const expiry = g.expiryDate ? new Date(g.expiryDate) : null;
+        const expiry = g.expiryDate ? new Date(g.expiryDate + 'T23:59:59') : null;
         const isExpired = expiry && now > expiry;
         const daysUntilExpiry = expiry ? Math.ceil((expiry - now) / (1000 * 60 * 60 * 24)) : null;
-        
-        // Warning styling for expiring/expired groups
+
         let warningStyle = '';
         let warningBadge = '';
         if (isExpired) {
@@ -2358,80 +2358,80 @@
         }
 
         const groupRequests = requests[g.dbId] || {};
-        const pending = Object.entries(groupRequests).filter(([k, r]) => r.status === 'pending').map(([k, r]) => ({ id: k, ...r }));
-        const accepted = Object.entries(groupRequests).filter(([k, r]) => r.status === 'accepted').map(([k, r]) => ({ id: k, ...r }));
-        const rejected = Object.entries(groupRequests).filter(([k, r]) => r.status === 'rejected').map(([k, r]) => ({ id: k, ...r }));
+        const pending  = Object.entries(groupRequests).filter(([k,r]) => r.status === 'pending').map(([k,r]) => ({id:k,...r}));
+        const accepted = Object.entries(groupRequests).filter(([k,r]) => r.status === 'accepted').map(([k,r]) => ({id:k,...r}));
+        const rejected = Object.entries(groupRequests).filter(([k,r]) => r.status === 'rejected').map(([k,r]) => ({id:k,...r}));
 
-        html += `<div class="form-card" style="margin-bottom: 2rem; ${warningStyle}">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <div class="form-title">${g.name}</div>
-        ${warningBadge}
-      </div>
-      <div style="margin-bottom: 1rem; padding: 10px 12px; background: var(--bg-secondary); border-radius: var(--radius-sm); font-size: 13px;">
-        <strong>Your WhatsApp:</strong> ${g.adminWhatsApp} | <strong>Pending:</strong> ${pending.length} | <strong>Accepted:</strong> ${accepted.length}
-        ${expiry ? `<br><strong>Expires:</strong> ${expiry.toLocaleDateString('en-PK')}` : '<br><strong>Expires:</strong> Not set'}
-      </div>
-      ${isExpired || (daysUntilExpiry !== null && daysUntilExpiry <= 3) ? `<div style="margin-bottom: 1rem;">
-        <button class="btn btn-primary" onclick="openExtendModal('${g.dbId}', '${g.name.replace(/'/g, "\\'")}')">⏳ Extend Deadline</button>
-      </div>` : ''}`;
+        const initials = n => (n||'?').split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2);
+        const avatarBase = `display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;font-family:var(--font);font-weight:700;font-size:13px;flex-shrink:0;`;
+
+        html += `<div class="form-card" style="margin-bottom:2rem;${warningStyle}">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+    <div class="form-title" style="margin-bottom:0;">${g.name}</div>
+    ${warningBadge}
+  </div>
+  <div style="margin-bottom:1.25rem;padding:10px 14px;background:var(--bg-secondary);border-radius:var(--radius-sm);font-size:13px;display:flex;gap:1.5rem;flex-wrap:wrap;">
+    <span>📱 <strong>${g.adminWhatsApp||'N/A'}</strong></span>
+    <span>⏳ Pending: <strong>${pending.length}</strong></span>
+    <span>✔ Taken: <strong>${accepted.length}</strong></span>
+    ${expiry?`<span>📅 Expires: <strong>${expiry.toLocaleDateString('en-PK',{month:'short',day:'numeric',year:'numeric'})}</strong></span>`:''}
+  </div>
+  ${isExpired||(daysUntilExpiry!==null&&daysUntilExpiry<=3)?`<div style="margin-bottom:1rem;"><button class="btn btn-primary" style="width:auto;padding:8px 16px;" onclick="openExtendModal('${g.dbId}','${g.name.replace(/'/g,"\\'")}')">⏳ Extend Deadline</button></div>`:''}`;
 
         if (!pending.length && !accepted.length && !rejected.length) {
-          html += `<div class="empty" style="padding: 2rem 1rem;"><div class="empty-icon">📬</div><div class="empty-title">No requests yet</div><div class="empty-sub">When people request to join,<br>they'll appear here.</div></div>`;
+          html += `<div class="empty" style="padding:2rem 1rem;"><div class="empty-icon">📬</div><div class="empty-title">No requests yet</div><div class="empty-sub">When people request to join,<br>they'll appear here.</div></div>`;
         } else {
           if (pending.length) {
-            html += `<div style="margin-bottom: 1.5rem;"><div style="font-weight: 600; color: var(--amber-text); margin-bottom: 0.75rem; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">⏳ Pending Requests (${pending.length})</div>`;
+            html += `<div style="margin-bottom:1.5rem;"><div style="font-weight:700;color:#D97706;margin-bottom:0.75rem;font-size:12px;text-transform:uppercase;letter-spacing:0.7px;">⏳ Pending (${pending.length})</div>`;
             pending.forEach(r => {
-              html += `<div class="card" style="margin-bottom: 0.75rem;">
-            <div style="margin-bottom: 0.75rem;">
-              <div style="font-weight: 600; font-size: 14px; color: var(--text);">${r.requesterName}</div>
-              <div style="font-size: 12px; color: var(--text-3); margin-top: 2px;">${r.requesterEmail} | <strong>WhatsApp:</strong> ${r.requesterWhatsApp || 'N/A'}</div>
-            </div>
-            ${r.requesterMessage ? `<div style="font-size: 13px; color: var(--text-2); margin-bottom: 0.75rem; padding: 8px 10px; background: var(--bg-secondary); border-radius: 6px; border-left: 3px solid var(--accent);">"${r.requesterMessage}"</div>` : ''}
-            <div style="display: flex; gap: 8px;">
-              <button class="btn btn-primary" onclick="acceptRequest('${g.dbId}', '${r.id}', '${r.requesterName}')">✓ Accept</button>
-              <button class="btn btn-danger" onclick="rejectRequest('${g.dbId}', '${r.id}')">✗ Reject</button>
-            </div>
-          </div>`;
+              html += `<div style="display:flex;gap:12px;align-items:flex-start;padding:14px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:10px;">
+    <div style="${avatarBase}background:var(--accent-bg);color:var(--accent-text);">${initials(r.requesterName)}</div>
+    <div style="flex:1;min-width:0;">
+      <div style="font-weight:700;font-size:14px;color:var(--text);">${r.requesterName}</div>
+      <div style="font-size:12px;color:var(--text-3);margin:3px 0 10px;">📧 ${r.requesterEmail} &nbsp;📱 ${r.requesterWhatsApp||'N/A'}</div>
+      ${r.requesterMessage?`<div style="font-size:13px;color:var(--text-2);margin-bottom:10px;padding:8px 12px;background:var(--bg-secondary);border-radius:6px;border-left:3px solid var(--accent);">&ldquo;${r.requesterMessage}&rdquo;</div>`:''}
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary" style="width:auto;padding:7px 16px;font-size:13px;" onclick="acceptRequest('${g.dbId}','${r.id}','${r.requesterName}')">✓ Accept</button>
+        <button class="btn btn-danger" style="width:auto;padding:7px 16px;font-size:13px;" onclick="rejectRequest('${g.dbId}','${r.id}')">✗ Reject</button>
+      </div>
+    </div>
+  </div>`;
             });
             html += `</div>`;
           }
 
           if (accepted.length) {
-            html += `<div style="margin-bottom: 1.5rem;"><div style="font-weight: 600; color: var(--green-text); margin-bottom: 0.75rem; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">✓ Accepted (${accepted.length})</div>`;
+            html += `<div style="margin-bottom:1.5rem;"><div style="font-weight:700;color:#059669;margin-bottom:0.75rem;font-size:12px;text-transform:uppercase;letter-spacing:0.7px;">✓ Marked Taken (${accepted.length})</div>`;
             accepted.forEach(r => {
-              html += `<div class="card" style="margin-bottom: 0.75rem; border-left: 3px solid var(--accent);">
-            <div style="display: flex; justify-content: space-between; align-items: start;">
-              <div>
-                <div style="font-weight: 600; font-size: 14px; color: var(--text);">${r.requesterName}</div>
-                <div style="font-size: 12px; color: var(--text-3); margin-top: 2px;">${r.requesterEmail} | <strong>WhatsApp:</strong> ${r.requesterWhatsApp || 'N/A'}</div>
-              </div>
-              <span class="badge badge-green">Accepted</span>
-            </div>
-          </div>`;
+              html += `<div style="display:flex;gap:12px;align-items:center;padding:12px 14px;background:var(--bg-card);border:1px solid var(--border);border-left:3px solid #059669;border-radius:var(--radius-sm);margin-bottom:8px;">
+    <div style="${avatarBase}background:rgba(5,150,105,0.1);color:#059669;">${initials(r.requesterName)}</div>
+    <div style="flex:1;min-width:0;">
+      <div style="font-weight:700;font-size:14px;color:var(--text);">${r.requesterName}</div>
+      <div style="font-size:12px;color:var(--text-3);margin-top:2px;">📧 ${r.requesterEmail} &nbsp;📱 ${r.requesterWhatsApp||'N/A'}</div>
+    </div>
+    <span style="display:inline-flex;align-items:center;padding:5px 12px;background:rgba(5,150,105,0.12);color:#059669;border-radius:100px;font-size:12px;font-weight:700;white-space:nowrap;">✓ Marked Taken</span>
+  </div>`;
             });
             html += `</div>`;
           }
 
           if (rejected.length) {
-            html += `<div><div style="font-weight: 600; color: var(--red-text); margin-bottom: 0.75rem; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">✗ Rejected (${rejected.length})</div>`;
+            html += `<div><div style="font-weight:700;color:var(--red-text);margin-bottom:0.75rem;font-size:12px;text-transform:uppercase;letter-spacing:0.7px;">✗ Rejected (${rejected.length})</div>`;
             rejected.forEach(r => {
-              html += `<div class="card" style="margin-bottom: 0.75rem; opacity: 0.6;">
-            <div style="display: flex; justify-content: space-between; align-items: start;">
-              <div>
-                <div style="font-weight: 600; font-size: 14px; color: var(--text);">${r.requesterName}</div>
-                <div style="font-size: 12px; color: var(--text-3); margin-top: 2px;">${r.requesterEmail}</div>
-              </div>
-              <span class="badge badge-red">Rejected</span>
-            </div>
-          </div>`;
+              html += `<div style="display:flex;gap:12px;align-items:center;padding:12px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;opacity:0.6;">
+    <div style="${avatarBase}background:rgba(220,38,38,0.08);color:var(--red-text);">${initials(r.requesterName)}</div>
+    <div style="flex:1;min-width:0;">
+      <div style="font-weight:700;font-size:14px;color:var(--text);">${r.requesterName}</div>
+      <div style="font-size:12px;color:var(--text-3);margin-top:2px;">📧 ${r.requesterEmail}</div>
+    </div>
+    <span style="display:inline-flex;align-items:center;padding:5px 12px;background:rgba(220,38,38,0.1);color:var(--red-text);border-radius:100px;font-size:12px;font-weight:700;white-space:nowrap;">✗ Rejected</span>
+  </div>`;
             });
             html += `</div>`;
           }
         }
-
         html += `</div>`;
       });
-
       el.innerHTML = html;
     }
 
