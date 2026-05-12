@@ -825,12 +825,19 @@
       const date = new Date(timestamp);
       const diffMs = now - date;
       const diffMins = Math.floor(diffMs / 60000);
-      const diffHours = Math.floor(diffMs / 3600000);
 
-      if (diffMins < 1) return 'now';
-      if (diffMins < 60) return `${diffMins}m ago`;
-      if (diffHours < 24) return `${diffHours}h ago`;
-      return date.toLocaleDateString();
+      const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return timeStr;
+
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const msgDay = new Date(date); msgDay.setHours(0, 0, 0, 0);
+      const dayDiff = Math.round((today - msgDay) / 86400000);
+
+      if (dayDiff === 0) return timeStr;
+      if (dayDiff === 1) return 'Yesterday ' + timeStr;
+      return date.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + timeStr;
     }
 
     // Check if message is older than 24 hours
