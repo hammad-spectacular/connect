@@ -214,7 +214,7 @@
     <div class="form">
       <div>
         <label class="label">Full Name</label>
-        <input class="input" id="displayName" placeholder="e.g. Hammad" autocomplete="name" />
+        <input class="input" id="displayName" placeholder="e.g. Hammad Khan" autocomplete="name" oninput="this.value=this.value.replace(/[0-9]/g,'')" />
       </div>
       
       <div>
@@ -291,11 +291,15 @@
     async function signUp() {
       showError('');
       const name = document.getElementById('displayName').value.trim();
-      const rawEmail = document.getElementById('email').value;
-      const email = rawEmail.toLowerCase().replace(/\s/g, "");
-      const password = document.getElementById('password').value;
-      
-      if (!email || !password) { showError('Please enter email and password.'); return; }
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (!name) { showError('Please enter your full name.'); return; }
+      if (/[0-9]/.test(name)) { showError('Name cannot contain numbers.'); return; }
+      const nameParts = name.split(/\s+/);
+      if (nameParts.length < 2 || !nameParts[1]) { showError('Please enter both your first and last name.'); return; }
+      if (!email) { showError('Please enter your email.'); return; }
+      if (!password) { showError('Please enter your password.'); return; }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('Please enter a valid email format.'); return; }
       if (password.length < 6) { showError('Password should be at least 6 characters.'); return; }
 
