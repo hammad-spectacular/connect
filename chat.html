@@ -584,6 +584,112 @@
         transform: rotate(360deg);
       }
     }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(10px);
+      transition: transform 0.2s ease;
+    }
+
+    .modal-overlay.open .modal {
+      transform: translateY(0);
+    }
+
+    .modal-title {
+      font-family: var(--font);
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    .modal-text {
+      font-size: 14px;
+      color: var(--text-2);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+
+    .modal-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .modal-btn {
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-2);
+      font-family: var(--font);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .modal-btn-secondary {
+      background: var(--bg-secondary);
+      color: var(--text);
+    }
+
+    .modal-btn-secondary:hover {
+      background: var(--bg-hover);
+      border-color: var(--accent);
+    }
+
+    .modal-btn-danger {
+      background: var(--red-bg);
+      color: var(--red-text);
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+
+    .modal-btn-danger:hover {
+      background: var(--red-text);
+      color: white;
+      border-color: var(--red-text);
+    }
+
+    .modal-btn-cancel {
+      background: transparent;
+      border: none;
+      color: var(--text-3);
+      font-weight: 500;
+      margin-top: 4px;
+    }
+
+    .modal-btn-cancel:hover {
+      color: var(--text);
+    }
   </style>
 </head>
 <body>
@@ -626,6 +732,23 @@
           </div>
           <button class="leave-btn" onclick="leaveRoom()">Leave Room</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leave Modal -->
+  <div class="modal-overlay" id="leaveModalOverlay">
+    <div class="modal">
+      <div class="modal-title">Leave Options</div>
+      <div class="modal-text">What would you like to do? You can exit the chat room or permanently leave the group.</div>
+      <div class="modal-options">
+        <button class="modal-btn modal-btn-secondary" onclick="goBack()">
+          <span>💬</span> Exit Chat Room
+        </button>
+        <button class="modal-btn modal-btn-danger" onclick="confirmLeaveGroup()">
+          <span>🚪</span> Leave Group Permanently
+        </button>
+        <button class="modal-btn modal-btn-cancel" onclick="closeLeaveModal()">Cancel</button>
       </div>
     </div>
   </div>
@@ -753,17 +876,43 @@
         .catch((err) => console.error('Error sending message:', err));
     }
 
-    // Leave group
+    // Leave group modal logic
     function leaveRoom() {
+      document.getElementById('leaveModalOverlay').classList.add('open');
+    }
+
+    function closeLeaveModal() {
+      document.getElementById('leaveModalOverlay').classList.remove('open');
+    }
+
+    function confirmLeaveGroup() {
       if (!currentUser || !currentGroupId) return;
 
-      if (confirm('Are you sure you want to leave this group?')) {
-        db.ref(`groups/${currentGroupId}/members/${currentUser.uid}`)
-          .remove()
+      if (confirm('Are you sure you want to permanently leave this group? You will need to request access again to re-join.')) {
+        const uid = currentUser.uid;
+        
+        // 1. Remove from members
+        const memberPromise = db.ref(`groups/${currentGroupId}/members/${uid}`).remove();
+        
+        // 2. Cleanup join requests
+        const requestsRef = db.ref(`requests/${currentGroupId}`);
+        const requestCleanupPromise = requestsRef.orderByChild('requesterUid').equalTo(uid).once('value')
+          .then(snapshot => {
+            const updates = {};
+            snapshot.forEach(child => {
+              updates[child.key] = null;
+            });
+            return requestsRef.update(updates);
+          });
+
+        Promise.all([memberPromise, requestCleanupPromise])
           .then(() => {
             goBack();
           })
-          .catch((err) => console.error('Error leaving group:', err));
+          .catch((err) => {
+            console.error('Error leaving group:', err);
+            alert('Failed to leave group properly. Please try again.');
+          });
       }
     }
 
