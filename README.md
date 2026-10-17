@@ -1,61 +1,119 @@
-Connect
+# 📚 Connect — Peer Study Groups (Flutter App)
 
-**Connecting university students across Pakistan.**
-
-## About the Project
-
-Connect is a student networking platform designed to connect university students across Pakistan, regardless of their university or academic discipline.
-
-The platform aims to help students discover like-minded people who share similar interests, ambitions, skills, and goals. By making these connections easier, Connect seeks to create opportunities for students to learn from one another, build relationships, and collaborate beyond the boundaries of their own universities.
-
-## Problem Statement
-
-University students often interact primarily with people from their own campuses and existing social circles. As a result, they may struggle to discover other students who share their interests, have complementary skills, or are pursuing similar goals.
-
-Connect aims to bridge this gap by providing a centralized platform where students can discover and connect with one another across universities.
-
-## Project Goals
-
-- **Student Discovery:** Help students find like-minded individuals from universities across Pakistan.
-- **Networking:** Enable students to build meaningful academic and professional relationships.
-- **Knowledge Sharing:** Encourage students to exchange ideas, experiences, and knowledge.
-- **Collaboration:** Create opportunities for students to work together on projects and shared interests.
-- **Opportunity Discovery:** Help students discover relevant events, competitions, workshops, and other opportunities.
-
-## Planned Features
-
-The initial version of Connect is expected to focus on:
-
-- Student registration and authentication.
-- Student profiles containing academic information, interests, skills, and goals.
-- A people-first discovery feed.
-- Search and filtering based on universities, disciplines, interests, and skills.
-- Connections between students.
-- Communication between connected students.
-- Basic safety features, including user blocking and reporting.
-
-Future development may introduce collaborative project listings, interest-based communities, study groups, and additional opportunity-discovery features.
-
-## Target Audience
-
-Connect is intended for university students across Pakistan from all academic disciplines, including computer science, software engineering, business, engineering, arts, sciences, and other fields.
-
-## Core Vision
-
-Connect is not intended to replace existing communication platforms. Its primary purpose is to help students discover people they might not otherwise meet.
-
-Once connected, students can choose how they want to communicate, learn, and collaborate, whether through Connect or other platforms.
-
-## Project Status
-
-**Currently in the planning and design phase.**
-
-The initial focus is defining the core user experience, student discovery system, authentication, and overall application architecture before implementation begins.
-
-## Future Direction
-
-The long-term vision is to build a connected student community across Pakistan where university boundaries do not limit opportunities to meet people, exchange knowledge, and work together.
+**Connect** is a modern, cross-platform Flutter application designed to help university students discover, create, and participate in peer study groups across various academic departments with real-time chat, group management, and analytics.
 
 ---
 
-*Connect — Find your people. Expand your possibilities.*
+## 🚀 Application Flow & Architecture
+
+```
+                       ┌─────────────────────────┐
+                       │       App Launch        │
+                       └────────────┬────────────┘
+                                    │
+                                    ▼
+                       ┌─────────────────────────┐
+                       │      Login Screen       │ ◄────► ┌───────────────────┐
+                       │  (Email + Any Password  │        │   Signup Screen   │
+                       │     123123 Required)    │        └───────────────────┘
+                       └────────────┬────────────┘
+                                    │
+                                    ▼
+                       ┌─────────────────────────┐
+                       │    Dashboard Screen     │
+                       └────────────┬────────────┘
+                                    │
+    ┌─────────────────┬─────────────┼─────────────┬─────────────────┐
+    │                 │             │             │                 │
+    ▼                 ▼             ▼             ▼                 ▼
+🔍 Browse        ✏️ Create       📚 My         📊 Stats         ⚙️ Admin
+ Groups            Group        Groups       Overview          Panel
+    │
+    └───────────────► 💬 Open Group Chat Room
+```
+
+---
+
+## ✨ Features & Functionality
+
+### 1. 🔐 Authentication Flow (`lib/login_screen.dart` & `lib/signup_screen.dart`)
+* **Initial Launch:** The app opens directly on the **Login Screen**.
+* **Flexible Email & Password Logic:**
+  * **Email:** Accepts **ANY** valid email address.
+  * **Password:** Hardcoded to **`123123`** for instant demonstration.
+* **Google Sign-In:** One-tap Google authentication option.
+* **Forgot Password:** Interactive modal dialog sending password reset email links.
+* **Account Registration:** Sign-Up screen collecting Full Name, Email, Password, Student ID, and Department.
+
+---
+
+### 2. 📊 Main Dashboard & Navigation (`lib/main.dart`)
+Includes **5 Interactive Category Navigation Tabs**:
+
+1. 🔍 **Browse Groups:**
+   * Live search bar to filter study groups by topic, course, or subject.
+   * Department filter chips (*Software Engineering, Computer Science, Electrical Engineering, BBA, Data Science, Cybersecurity, Other*).
+   * Group Cards displaying session time, location, member capacity chips, WhatsApp contact button, and **Join / Leave / Chat** actions.
+2. ✏️ **Create Group:**
+   * Interactive creation form to launch a new study group with name, department, session date, join deadline, location, and description.
+3. 📚 **My Groups:**
+   * Filtered view displaying only groups created by or joined by the logged-in user.
+4. 📊 **Overview & Stats:**
+   * Visual metrics showing Total Groups, Total Members, Open Spots, and Department Breakdown progress bars.
+5. ⚙️ **Admin Panel:**
+   * Group creators can manage pending join requests with **Approve** and **Reject** buttons.
+
+---
+
+### 3. 💬 Group Chat Room & Unique Member Colors (`lib/chat.dart`)
+Tapping the **Chat** button on any joined group card opens the dedicated `ChatScreen`:
+
+* **Sender Name on Top:** Every message displays the author's name at the top.
+* **Unique Color Per Person:**
+  * Every member in a group is automatically assigned a distinct, vibrant color (*Blue, Purple, Emerald, Amber, Crimson, Teal, Indigo, Rose*).
+  * The member's name, message bubble border, file card, and sidebar avatar match their unique assigned color.
+* **Realtime Typing Indicator:**
+  * Displays an animated indicator (`Sara Khan is typing...`) when a group member is actively typing.
+* **Emoji Picker & Attachments:**
+  * Built-in emoji grid picker and PDF file attachment cards.
+* **Active Members Sidebar:**
+  * Displays all group members with online indicators and unique color avatars.
+
+---
+
+### 🎨 Design System & Performance Highlights
+
+* ⚡ **Lag-Free Theme Switching:** Uses `ValueNotifier<ThemeMode>` and `AnimatedTheme` for smooth 60 FPS transitions between Light Mode (`#F7F5F0`) and Dark Mode (`#0C0A09`).
+* 🌙 **Sleek Dark Mode UI:** Dark card borders (`#292524`), clean typography, and zero harsh white outlines.
+* 📦 **Modular Architecture:** Clean separation of concerns with `main.dart`, `chat.dart`, `login_screen.dart`, and `signup_screen.dart`.
+
+---
+
+## 🛠️ Getting Started
+
+### Prerequisites
+* [Flutter SDK](https://docs.flutter.dev/get-started/install) (3.0.0 or higher)
+* [Dart SDK](https://dart.dev/get-started/get-dart)
+* Android Studio / VS Code
+
+### Running the App
+```bash
+# Get Flutter dependencies
+flutter pub get
+
+# Run on Chrome
+flutter run -d chrome
+
+# Run on Mobile Emulator or Device
+flutter run
+```
+
+---
+
+## 🔄 Real-Time Database Sync Roadmap
+
+To connect this application to a real-time cloud database (e.g. Firebase / Supabase) so all user accounts, study groups, and chat messages synchronize live across multiple devices:
+
+1. **Authentication Sync:** Connect `FirebaseAuth` for email/password and Google Sign-In.
+2. **Real-time Study Groups:** Connect `Firebase Realtime Database` or `Cloud Firestore` to sync study group creation, member joins, and admin requests instantly across all devices.
+3. **Live Group Chat:** Use `StreamBuilder` connected to Firebase chat collections so messages, file attachments, and typing indicators stream live to all group members.
